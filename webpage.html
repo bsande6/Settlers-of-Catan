@@ -1,0 +1,3186 @@
+<html>
+  <head>
+    <script src = "player.js"></script>
+    <script src = "BoardGraph.js"></script>
+    <script src = "GameBoard.js"></script>
+    <script src ="/socket.io/socket.io.js"></script>
+    <script src = "camConn.js"></script>
+    <link rel = "stylesheet" type = "text/css" href="styles.css">
+
+    <style type = "text/css">
+  </style>
+  <script type = "text/javascript">
+
+  var socket = io();
+  var currentPlayer;
+  var portsList;
+  var numPlayers = 0;
+  var playerPos;
+  socket.on('newPlayer', function(data) {
+    if (numPlayers < 4) {
+      numPlayers = data.length;
+      console.log(numPlayers);
+     playerPos = 'player' + data.length;
+    }
+  });
+  var playerList = new Array();
+  colorArray = ['blue', 'orange', 'purple', 'brown'];
+  for (var i = 0; i <4; i++) {
+    var player = new Player(colorArray[i]);
+    playerList.push(player);
+  }
+
+  //socket.on('newPlayer', function(data) {
+  //var player = new Player(colorArray[data.index]);
+  //playerList.push(player);
+  //});
+  var isPlayerOne = false;
+  socket.on('isPlayerOne', function()  {
+    isPlayerOne = true;
+  });
+  var displayRoll;
+
+  var max_roll = 0;
+  var robber;
+  var robberLocation;
+  var tiles;
+  var buildList = new Array();
+  //var roadMap = new Map();
+  var gameBoard;
+  //var board;
+  //var vertices;
+  var port_number = 0;
+  //var setup = true;
+  //var count = 0;
+  //var turn =0;
+  //var firstTurn = 0;
+  var num_count = 0;
+
+  Array.prototype.tile_num_shuffle = function() {
+    var i = this.length, j, temp;
+    while(--i> 0) {
+      j = Math.floor(Math.random()*(i+1));
+      temp = this[j];
+      this[j] = this[i];
+      this[i] = temp;
+    }
+  }
+  /*
+  function blankBoard(board) {
+    for (var i = 0; i < 37; i++) {
+      if (i < 1) {
+        var hex = document.createElement('div');
+        hex.classList.add('row1','hex', 'ocean');
+        //hex.classList.add('ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 4) {
+        var hex = document.createElement('div');
+        hex.classList.add('ocean', 'hex');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 5) {
+          var hex = document.createElement('div');
+          var row = document.createElement('div');
+          row.classList.add('hex-row');
+          hex.classList.add('row2', 'hex','ocean');
+          board.appendChild(row);
+          board.appendChild(hex);
+          document.body.appendChild(board);
+      }
+      else if (i < 8) {
+        var hex = document.createElement('div');
+        //if (start == 1) {
+          hex.classList.add('hex');
+          board.appendChild(hex);
+          document.body.appendChild(board);
+
+      }
+      else if (i < 9) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 10) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean', 'hex-row', 'row3');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 14) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 15) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i< 16) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean', 'hex-row', 'row4');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i< 21) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 22) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 23) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean', 'hex-row', 'row3');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 27) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 28) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 29) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean', 'hex-row', 'row2');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i<32) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i<33) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else if (i < 34) {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean', 'hex-row', 'row1');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+      else {
+        var hex = document.createElement('div');
+        hex.classList.add('hex','ocean');
+        board.appendChild(hex);
+        document.body.appendChild(board);
+      }
+    }
+  }
+
+
+/*
+  function newBoard(data) {
+    var portCount = 0;
+    port_number = 0;
+    var count = 0;
+    gameBoard = new BoardGraph(54);
+    vertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                    'Y', 'Z', 'AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG', 'HH',
+                    'II', 'JJ', 'KK', 'LL', 'MM', 'NN', 'OO', 'PP', 'QQ', 'RR',
+                    'SS', 'TT', 'UU', 'VV', 'WW', 'XX','YY','ZZ','AAA','BBB'];
+
+    for (var i = 0; i<vertices.length; i++) {
+      gameBoard.addVertex(vertices[i]);
+    }
+    gameBoard.addEdge('A', 'B');
+    gameBoard.addEdge('A', 'I');
+    gameBoard.addEdge('B', 'C');
+    gameBoard.addEdge('C', 'D');
+    gameBoard.addEdge('C', 'K');
+    gameBoard.addEdge('D', 'E');
+    gameBoard.addEdge('E', 'F');
+    gameBoard.addEdge('E', 'M');
+    gameBoard.addEdge('F', 'G');
+    gameBoard.addEdge('G', 'O');
+    gameBoard.addEdge('H', 'I');
+    gameBoard.addEdge('H', 'R');
+    gameBoard.addEdge('I', 'J');
+    gameBoard.addEdge('J', 'K');
+    gameBoard.addEdge('J', 'T');
+    gameBoard.addEdge('K', 'L');
+    gameBoard.addEdge('L', 'M');
+    gameBoard.addEdge('L', 'V');
+    gameBoard.addEdge('M', 'N');
+    gameBoard.addEdge('N', 'X')
+    gameBoard.addEdge('N', 'O');
+    gameBoard.addEdge('O', 'P');
+    gameBoard.addEdge('P', 'Z');
+    gameBoard.addEdge('Q', 'R');
+    gameBoard.addEdge('Q', 'BB');
+    gameBoard.addEdge('R', 'S');
+    gameBoard.addEdge('S', 'T');
+    gameBoard.addEdge('S', 'DD');
+    gameBoard.addEdge('T', 'U');
+    gameBoard.addEdge('U', 'V');
+    gameBoard.addEdge('U', 'FF');
+    gameBoard.addEdge('V', 'W');
+    gameBoard.addEdge('W', 'X');
+    gameBoard.addEdge('W', 'HH');
+    gameBoard.addEdge('X', 'Y');
+    gameBoard.addEdge('Y', 'JJ');
+    gameBoard.addEdge('Y', 'Z');
+    gameBoard.addEdge('Z', 'AA');
+    gameBoard.addEdge('AA', 'LL');
+    gameBoard.addEdge('BB', 'CC');
+    gameBoard.addEdge('CC', 'DD');
+    gameBoard.addEdge('CC', 'MM');
+    gameBoard.addEdge('DD', 'EE');
+    gameBoard.addEdge('EE', 'OO');
+    gameBoard.addEdge('EE', 'FF');
+    gameBoard.addEdge('FF', 'GG');
+    gameBoard.addEdge('GG', 'HH');
+    gameBoard.addEdge('GG', 'QQ');
+    gameBoard.addEdge('HH', 'II');
+    gameBoard.addEdge('II', 'JJ');
+    gameBoard.addEdge('II', 'SS')
+    gameBoard.addEdge('JJ', 'KK');
+    gameBoard.addEdge('KK', 'UU');
+    gameBoard.addEdge('KK', 'LL');
+    gameBoard.addEdge('MM', 'NN');
+    gameBoard.addEdge('NN', 'VV');
+    gameBoard.addEdge('NN', 'OO');
+    gameBoard.addEdge('OO', 'PP');
+    gameBoard.addEdge('PP', 'QQ');
+    gameBoard.addEdge('PP', 'XX');
+    gameBoard.addEdge('RR', 'ZZ');
+    gameBoard.addEdge('QQ', 'RR');
+    gameBoard.addEdge('RR', 'SS');
+    gameBoard.addEdge('TT', 'UU');
+    gameBoard.addEdge('SS', 'TT');
+    gameBoard.addEdge('TT', 'BBB')
+    gameBoard.addEdge('VV', 'WW');
+    gameBoard.addEdge('WW', 'XX');
+    gameBoard.addEdge('XX', 'YY');
+    gameBoard.addEdge('YY', 'ZZ');
+    gameBoard.addEdge('ZZ', 'AAA');
+    gameBoard.addEdge('AAA', 'BBB');
+
+    //for (var x = 0; x < vertices.length; x++) {
+  //    var get_keys= board.AdjList.get(vertices[x]);
+  //    roadMap.set(vertices[x], get_keys);
+  //  }
+    /*roadMap.set('A', ['R1','R6']);
+    roadMap.set('B', ['R1', 'R2']);
+    roadMap.set('C', ['R2', 'R3', 'R7']);
+    roadMap.set('D', ['R7', 'R8']);
+    roadMap.set('E', ['R8', 'R12']);
+
+
+    .set('F', ['R12', 'R13']);
+    roadMap.set('G', ['R13', 'R14']);
+    roadMap.set('H', ['R'])
+    roadMap.set('I')
+    roadMap.set('J')
+    roadMap.set('K')
+    roadMap.set('L')
+    roadMap.set()
+    roadMap.set()
+    roadMap.set()
+    */
+
+
+
+    //div.innerHTML = '';
+    /*
+    tiles = document.getElementsByClassName('hex');
+    for (i = 0; i < 37; i++) {
+        if (i == 0 || i == 2 || i == 8 || i == 9 || i == 21 ||
+            i == 22 || i == 32 || i == 33 || i == 35) {
+            console.log(data.port_array[port_number]);
+            displayPort(data.port_array[port_number], tiles[i], portCount);
+            portCount ++;
+            tiles[i].value = 0;
+          }
+        else  if ((i > 4 && i < 8) || (i>9 && i<14) || (i>15 && i<21) ||
+                  (i>22 && i <27) || (i>28 && i <32)) {
+          getResource(data.hex_array[count], tiles[i], data.num_array[num_count]);
+
+
+          count++;
+        }
+        if (tiles[i].classList.contains('desert')) {
+          robber = document.createElement('div');
+          robber.classList.add('robber');
+          tiles[i].appendChild(robber);
+          robberLocation = i;
+        }
+        //tiles[i].id = i;
+    }
+    if (isPlayerOne === true) {
+      console.log('beg');
+      socket.emit('Begin');
+    }
+  //  for (var j = 0; j<37; j++) {
+    //  if tiles[j].classList.contains(robber) {
+  //      robber = j;
+  //    }
+
+
+        //  var hex = document.createElement('div');
+
+          //hex.classList.add('row1', 'ocean-hex');
+          //div.appendChild(hex);
+          //document.body.appendChild(div);
+
+  }
+  function displayPort(port, hex, portCount) {
+      var element = document.createElement('div');
+      element.classList.add("port_format");
+      element.style.fontSize = '20px';
+      element.style.fontcolor = 'white';
+      port = port.fontcolor("white");
+      element.innerHTML= port;
+      hex.appendChild(element);
+      var portLocation = document.createElement('div');
+      portLocation.classList.add('port_display');
+      port_number++;
+      if (portCount == 0) {
+        portLocation.classList.add('bottom_right_edge');
+      }
+      else if (portCount == 1 || portCount == 2) {
+        portLocation.classList.add('bottom_left_edge');
+      }
+      else if (portCount == 4) {
+        portLocation.classList.add('left_edge');
+      }
+      else if (portCount == 3 || portCount == 5) {
+        portLocation.classList.add('right_edge');
+      }
+      else if  (portCount == 6 || portCount == 8) {
+        portLocation.classList.add('top_left_edge');
+      }
+      else {
+        portLocation.classList.add('top_right_edge');
+      }
+      hex.appendChild(portLocation);
+  }
+  function getResource(resource, hex, number) {
+    if (resource == 'Wheat') {
+      //var hex = document.createElement('div');
+      hex.classList.add('wheat');
+      var value = document.createElement('div');
+      value.classList.add('hex_number');
+      value.style.fontSize = "25px";
+      value.innerHTML = number;
+      hex.appendChild(value);
+      hex.value = number;
+      hex.resource = 'wheat';
+      num_count++;
+
+  //    count++;
+    //  document.body.appendChild(hex);
+    }
+    else if (resource == 'Wood') {
+    //  var hex = document.createElement('div');
+      hex.classList.add('wood');
+      var value = document.createElement('div');
+      value.classList.add('hex_number');
+      value.style.fontSize = "25px";
+      value.innerHTML = number;
+      hex.appendChild(value);
+      hex.value = number;
+      hex.resource = 'wood';
+      num_count++;
+    //  count++;
+      //div.appendChild(hex);
+  //    document.body.appendChild(hex);
+    }
+    else if (resource == 'Sheep') {
+  //    var hex = document.createElement('div');
+      hex.classList.add('sheep');
+  //    var value = document.createTextMode('number');
+      var value = document.createElement('div');
+      value.classList.add('hex_number');
+      value.style.fontSize = "25px";
+      value.innerHTML = number;
+      hex.appendChild(value);
+      hex.value = number;
+      hex.resource = 'sheep';
+      num_count++;
+      //count++;
+    //  hex.appendChild(value);
+    //  div.appendChild(hex);
+  //    document.body.appendChild(hex);
+    }
+    else if (resource == 'Brick') {
+  //    var hex = document.createElement('div');
+      hex.classList.add('brick');
+      var value = document.createElement('div');
+      value.classList.add('hex_number');
+      value.style.fontSize = "25px";
+      value.innerHTML = number;
+      hex.appendChild(value);
+      hex.value = number;
+      hex.resource = 'brick';
+      num_count++;
+
+    //  div.appendChild(hex);
+    //  document.body.appendChild(hex);
+    }
+    else if (resource == 'Rock') {
+    //  var hex = document.createElement('div');
+      hex.classList.add('rock');
+      var value = document.createElement('div');
+      value.classList.add('hex_number');
+      value.style.fontSize = "25px";
+      value.innerHTML = number;
+      hex.appendChild(value);
+      hex.value = number;
+      hex.resource = 'ore';
+      num_count++;
+    //  count++;
+    //  div.appendChild(hex);
+    //  document.body.appendChild(hex);
+    }
+    else {
+    //  var hex = document.createElement('div');
+      hex.classList.add('desert');
+
+    //  count++;
+    //  div.appendChild(hex);
+      //document.body.appendChild(hex)
+    }
+  //  return hex;
+  }
+*/
+  function gameWindow() {
+    var side = document.createElement('gameWindow');
+    side.classList.add('sidebar');
+  //  document.body.appendChild('side');
+  }
+
+  /*socket.on('newBoard', function(data) {
+    console.log('b');
+    newBoard(data);
+  });*/
+
+
+  //function gameLoop() {
+  //  socket.emit('newBoard')
+  //  newBoard();
+
+    //var colorArray = ['blue', 'red', 'yellow', 'green'];
+  //  for (i =0; i<4; i++) {
+      //var player = new Player(i, colorArray[i]);
+    //  playerList.push(player);
+      //player = new Player('p2', 'red');
+      //player3 = new Player('p3', 'green');
+//      //player4 = new Player('p3', 'blue');
+  //  p1_points = 0;
+//    p2_points = 0;
+//    p3_points = 0;
+  //  p4_points = 0;
+  //  turn = 0;
+  //  max_roll = 0;
+
+  //  gameStart(div, playerList);
+
+    //while (turn < 4) {
+    //  gameStart(div);
+    //  if (roll > max_roll) {
+    //    roll = max_roll
+    //    console.log(max_roll);
+    //  }
+    //}
+//  }//while (p1_points != 10 && p2_points != 10 && p3_points != 10 && p4_points != 10) {
+
+
+  /*socket.on('bottomSpace', function(data) {
+    bottomSpace(data);
+  }); */
+  function bottomSpace(data) {
+    console.log('a');
+    console.log(data.id);
+    console.log(data.currentPlayer);
+    var settle = buildSettlement(data.currentPlayer, data.node);
+    settle.style.marginLeft = '39px';
+    settle.style.marginTop ='68px';
+    node = document.getElementById(data.id);
+    document.getElementById(data.id).appendChild(settle);
+    var index = buildList.indexOf(node);
+    var get_keys= gameBoard.AdjList.get(vertices[index]);
+    data.currentPlayer.roadMap.addVertex(vertices[index]);
+    var max = 0;
+    var min = 0;
+    for (var k of get_keys) {
+      if (vertices.indexOf(k) >= max) {
+          min = max;
+          max = vertices.indexOf(k);
+      }
+      else {
+        min = vertices.indexOf(k);
+      }
+      var adj = vertices.indexOf(k);
+      socket.emit('updateSpaces', {index: vertices.indexOf(k)});
+      removeSpace = document.getElementById(adj);
+      if (removeSpace) {
+        removeSpace.style.visibility = 'hidden';
+        removeSpace.style.pointerEvents = 'none';
+      }
+    }
+    node.parentNode.insertBefore(node.firstChild, node);
+    node.style.visibility = 'hidden';
+    node.style.pointerEvents = 'none';
+  }
+  //this.parentNode.removeChild(this);
+  //function startingSettlements() {
+  //  var availableSpaces = document.getElementsByClassName('hex');
+  //}
+
+  function settlementSetup(data) {
+      var availableSpaces = document.getElementsByClassName('hex');
+      alert("place settlements");
+      var count = 0;
+      var vertCount = 0;
+       //todo cases where top and bottom roads should not be available
+       // loops through all tiles on the board and creates a node for each
+       // vertex at the bottom and bottom right corners of the hexagon
+        for (i = 0; i<availableSpaces.length; i++) {
+
+          // case where ocean blocks road on rightside of the node
+          if (i == 3 || i == 8|| i == 14) {
+            if (data.openSpace[vertCount] == true) {
+              console.log(data.openSpace);
+              var bottomSpace = document.createElement('div');
+              bottomSpace.id = vertCount;
+
+              buildList.push(bottomSpace);
+              bottomSpace.classList.add('open_space_bottom_vertex');
+              bottomSpace.style.visibility = 'hidden';
+              bottomSpace.style.pointerEvents = 'none';
+          //  var bottomSpace = document.createElement('div');
+          //  bottomSpace.id = vertCount;
+            //buildList.push(bottomSpace);
+            //bottomSpace.classList.add('open_space_bottom_vertex');
+            // builds a settlement associated with currentPlayer
+              bottomSpace.onclick = function() {
+
+
+                var currentPlayer = playerList[data.firstTurn];
+                var settle = buildSettlement(currentPlayer, this);
+                console.log(settle);
+                settle.style.marginLeft = '39px';
+                settle.style.marginTop ='68px';
+                //n = document.getElementById(data.id);
+              //  document.getElementById(data.id).appendChild(settle);
+                var index = buildList.indexOf(this);
+                var get_keys= gameBoard.AdjList.get(vertices[index]);
+                currentPlayer.roadMap.addVertex(vertices[index]);
+                var max = 0;
+                var min = 0;
+                for (var k of get_keys) {
+                  if (vertices.indexOf(k) >= max) {
+                      min = max;
+                      max = vertices.indexOf(k);
+                  }
+                  else {
+                    min = vertices.indexOf(k);
+                  }
+                  var adj = vertices.indexOf(k);
+                  socket.emit('updateSpaces', {index: vertices.indexOf(k)});
+                  removeSpace = document.getElementById(adj);
+                  if (removeSpace) {
+                    removeSpace.style.visibility = 'hidden';
+                    removeSpace.style.pointerEvents = 'none';
+                  }
+                }
+                node.parentNode.insertBefore(node.firstChild, node);
+                node.style.visibility = 'hidden';
+                node.style.pointerEvents = 'none';
+                //var settle = buildSettlement(data.currentPlayer, data.node);
+              //  socket.emit('bottom', {player: currentPlayer, id: this});
+
+                botRoad = document.createElement('button');
+                botRoad.innerHTML = 'Road';
+                botRoad.style.marginTop = '25px';
+                botRoad.style.marginLeft = '-19px';
+                botRoad.onclick = function() {
+                  currentPlayer.roadMap.addVertex(vertices[max]);
+                  currentPlayer.roadMap.addEdge(vertices[index], vertices[max]);
+                  var road = buildRoad(currentPlayer, settle);
+                  road.style.marginTop = '30px';
+                  road.style.marginLeft = '-8px';
+                  road.style.transform = "rotate(90deg)";
+
+                  leftRoad.remove();
+                  botRoad.remove();
+                  end = document.createElement('button');
+                  end.innerHTML = 'End Turn';
+                  end.onclick = function() {
+
+                                if (count == 3) {
+                                  data.firstTurn = data.firstTurn;
+                                }
+                                else if (count < 3) {
+                                  if (data.firstTurn < 3) {
+                                    data.firstTurn ++
+                                  }
+                                  else {
+                                    data.firstTurn = 0;
+                                  }
+                                }
+                                else if (count > 3) {
+                                  startingResources(currentPlayer);
+                                  if (firstTurn > 0) {
+                                    firstTurn--;
+                                  }
+                                  else {
+                                    firstTurn = 3;
+                                  }
+
+                                }
+                                count++;
+                                this.remove();
+                                for (var l = 0; l < buildList.length; l++) {
+                                  if(document.getElementById(l)) {
+                                    //console.log('a');
+                                    document.getElementById(l).style.pointerEvents = 'auto';
+                                  }
+                                }
+                                if (count == 8) {
+                                  for(var m = 0; m < buildList.length; m++) {
+                                    if(document.getElementById(m)) {
+                                      //document.getElementById.remove();
+                                      document.getElementById(m).style.visibility = 'hidden';
+                                      document.getElementById(m).style.pointerEvents = 'none';
+                                    }
+                                  }
+                                  main();
+                                }
+                          }
+                          document.body.appendChild(end);
+                }
+                leftRoad = document.createElement('button');
+                leftRoad.innerHTML = 'Road';
+                leftRoad.style.marginLeft = '-48px';
+                leftRoad.style.marginTop = '-30px';
+                leftRoad.onclick = function() {
+                  var road = buildRoad(currentPlayer, settle);
+                  road.style.marginLeft = '-37px';
+                  road.style.marginTop = '-19px';
+                  road.style.transform = "rotate(30deg)";
+                  currentPlayer.roadMap.addVertex(vertices[min]);
+                  currentPlayer.roadMap.addEdge(vertices[min], vertices[index]);
+                  leftRoad.remove();
+                  botRoad.remove();
+                  end = document.createElement('button');
+                  end.innerHTML = 'End Turn';
+                  end.onclick = function() {
+
+                                if (count == 3) {
+                                  firstTurn = firstTurn;
+                                }
+                                else if (count < 3) {
+                                  if (firstTurn < 3) {
+                                    firstTurn ++
+                                  }
+                                  else {
+                                    firstTurn = 0;
+                                  }
+                                }
+                                else if (count > 3) {
+                                  if (firstTurn > 0) {
+                                    firstTurn--;
+                                  }
+                                  else {
+                                    firstTurn = 3;
+                                  }
+                                }
+                                count++;
+                                this.remove();
+                                for (var l = 0; l < buildList.length; l++) {
+                                  if(document.getElementById(l)) {
+                                    //console.log('a');
+                                    document.getElementById(l).style.pointerEvents = 'auto';
+                                  }
+                                }
+                                if (count == 8) {
+
+                                  for(var m = 0; m < buildList.length; m++) {
+                                    if(document.getElementById(m)) {
+                                      document.getElementById(m).visibility = 'hidden';
+                                      document.getElementById(m). pointerEvents = 'none';
+                                    }
+                                  }
+                                  main();
+                                }
+                          }
+                          document.body.appendChild(end);
+                }
+                //this.appendChild(botRoad);
+                //this.appendChild(leftRoad);
+                for (var l = 0; l < buildList.length; l++) {
+                  if(document.getElementById(l)) {
+                    document.getElementById(l).style.pointerEvents = 'none';
+                  }
+                }
+                //var leftRoad = document.createElement('div');
+
+              }
+              //settle.style.background = 'red'
+              vertCount++;
+
+              availableSpaces[i].appendChild(bottomSpace);
+            }
+          }
+          else if (i == 15 || i == 22 || i == 28) {
+            var space = document.createElement('div');
+            space.id = vertCount;
+            vertCount++;
+            buildList.push(space);
+            space.classList.add('open_space_right_vertex');
+            space.onclick = function() {
+              var currentPlayer = playerList[firstTurn];
+              var settle = buildSettlement(currentPlayer, this);
+              var index = buildList.indexOf(this);
+              var get_keys= gameBoard.AdjList.get(vertices[index]);
+
+              //console.log(get_keys);
+
+              this.parentNode.insertBefore(this.firstChild, this);
+              this.style.visibility = 'hidden';
+              this.style.pointerEvents = 'none';
+              currentPlayer.roadMap.addVertex(vertices[index]);
+              //this.parentNode.removeChild(this);
+              settle.style.marginLeft = '84px';
+              settle.style.marginTop ='42px';
+              var max = -1;
+              var min = -1;
+              for (var k of get_keys) {
+                if(vertices.indexOf(k) > max) {
+                  min = max;
+                  max = vertices.indexOf(k);
+                }
+                else {
+                  min = vertices.indexOf(k);
+                }
+                var adj = vertices.indexOf(k);
+
+                removeSpace = document.getElementById(adj);
+                if (removeSpace) {
+                //  removeSpace.remove();
+                    removeSpace.style.visibility = 'hidden';
+                    removeSpace.style.pointerEvents = 'none';
+                }
+              }
+
+              var rightRoad = document.createElement('button');
+              rightRoad.innerHTML = 'Road';
+              rightRoad.style.marginLeft = '13px';
+              rightRoad.style.marginTop = '-23px';
+              rightRoad.onclick = function() {
+                currentPlayer.roadMap.addVertex(vertices[max]);
+                currentPlayer.roadMap.addEdge(vertices[index], vertices[max]);
+                var road = buildRoad(currentPlayer, settle);
+                leftRoad.remove();
+                rightRoad.remove();
+                topRoad.remove();
+                road.style.marginLeft = '21px';
+                road.style.marginTop = '26px';
+                road.style.transform = 'rotate(30deg)';
+                end = document.createElement('button');
+                end.innerHTML = 'End Turn';
+                end.onclick = function() {
+
+                              if (count == 3) {
+                                firstTurn = firstTurn;
+                              }
+                              else if (count < 3) {
+                                if (firstTurn < 3) {
+                                  firstTurn ++
+                                }
+                                else {
+                                  firstTurn = 0;
+                                }
+                              }
+                              else if (count > 3) {
+                                if (firstTurn > 0) {
+                                  firstTurn--;
+                                }
+                                else {
+                                  firstTurn = 3;
+                                }
+
+                              }
+                              count++;
+                              this.remove();
+                              for (var l = 0; l < buildList.length; l++) {
+                                if(document.getElementById(l)) {
+                                  //console.log('a');
+                                  document.getElementById(l).style.pointerEvents = 'auto';
+                                }
+                              }
+                              if (count == 8) {
+                               for(var m = 0; m < buildList.length; m++) {
+                                 if(document.getElementById(m)) {
+                                   document.getElementById.style.visibility = 'hidden';
+                                   document.getElementById.style.pointerEvents = 'none';
+                                 }
+                               }
+                               main();
+                              }
+                        }
+                        document.body.appendChild(end);
+              }
+              var topRoad = document.createElement('button');
+              topRoad.innerHTML = 'Road';
+              topRoad.style.marginTop = '-65px';
+              topRoad.style.marginLeft = '-19px';
+              topRoad.onclick = function() {
+                currentPlayer.roadMap.addVertex(vertices[min]);
+                currentPlayer.roadMap.addEdge(vertices[index], vertices[min]);
+                var road = buildRoad(currentPlayer, settle);
+                road.style.marginTop = '-30px';
+                road.style.marginLeft = '-8px';
+                road.style.transform = "rotate(90deg)";
+                leftRoad.remove();
+                rightRoad.remove();
+                topRoad.remove();
+                end = document.createElement('button');
+                end.innerHTML = 'End Turn';
+                end.onclick = function() {
+
+                              if (count == 3) {
+                                firstTurn = firstTurn;
+                              }
+                              else if (count < 3) {
+                                if (firstTurn < 3) {
+                                  firstTurn ++
+                                }
+                                else {
+                                  firstTurn = 0;
+                                }
+                              }
+                              else if (count > 3) {
+                                if (firstTurn > 0) {
+                                  firstTurn--;
+                                }
+                                else {
+                                  firstTurn = 3;
+                                }
+
+                              }
+                              count++;
+                              this.remove();
+                              for (var l = 0; l < buildList.length; l++) {
+                                if(document.getElementById(l)) {
+                                  document.getElementById(l).style.pointerEvents = 'auto';
+                                }
+                              }
+                              if (count == 8) {
+                                for(var m = 0; m < buildList.length; m++) {
+                                  if(document.getElementById(m)) {
+                                    document.getElementById(m).style.pointerEvents = 'none';
+                                    document.getElementById(m).style.visibility = 'hidden';
+                                  }
+                                }
+                                main();
+                              }
+                        }
+                        document.body.appendChild(end);
+              }
+              settle.appendChild(topRoad);
+              settle.appendChild(rightRoad);
+              for (var l = 0; l < buildList.length; l++) {
+                if(document.getElementById(l)) {
+                  document.getElementById(l).style.pointerEvents = 'none';
+                }
+              }
+            //settle.style.background = 'blue';
+          }
+          availableSpaces[i].appendChild(space);
+        }
+        else if ((i < 32) && (i!=27) && (i!=21)) {
+          var bottomSpace = document.createElement('div');
+          bottomSpace.id = vertCount;
+          vertCount++;
+          var space = document.createElement('div');
+          space.id = vertCount;
+          vertCount++;
+          buildList.push(bottomSpace);
+          buildList.push(space);
+          space.classList.add('open_space_right_vertex');
+          bottomSpace.classList.add('open_space_bottom_vertex');
+          var parent = availableSpaces[i];
+          space.onclick = function() {
+            var currentPlayer = playerList[firstTurn];
+            var index = buildList.indexOf(this);
+
+            var get_keys= gameBoard.AdjList.get(vertices[index]);
+
+            //console.log(get_keys);
+            var settle = buildSettlement(currentPlayer, this);
+            this.parentNode.insertBefore(this.firstChild, this);
+            //this.parentNode.removeChild(this);
+            this.style.visibility = 'hidden';
+            this.style.pointerEvents = 'none';
+            currentPlayer.roadMap.addVertex(vertices[index]);
+            var min = -1;
+            var max = -1;
+            var mid = -1;
+            for (var k of get_keys) {
+
+              if (vertices.indexOf(k) > max) {
+                min = mid;
+                mid = max;
+                max = vertices.indexOf(k);
+              }
+              else if (vertices.indexOf(k) < max) {
+                if (vertices.indexOf(k) < mid) {
+                  min = vertices.indexOf(k);
+                }
+                else {
+                  min = mid;
+                  mid = vertices.indexOf(k);
+                }
+              }
+              //var adj = vertices.indexOf(board.AdjList.get(k));
+              var adj = vertices.indexOf(k);
+
+              //removeSpace = buildList[vertices.indexOf(get_keys[k])];
+              removeSpace = document.getElementById(adj);
+              if (removeSpace) {
+                //removeSpace.remove();
+                removeSpace.style.visibility = 'hidden';
+                removeSpace.style.pointerEvents = 'none';
+              }
+              //removeSpace.parentNode.insertBefore(removeSpace.firstChild, removeSpace);
+              //removeSpace.parentNode.removeChild(removeSpace);
+            }
+
+            settle.style.marginLeft = '92px';
+            settle.style.marginTop ='45px';
+            if (i !=31 || i!= 26 || i!= 20) {
+              console.log(i);
+              rightRoad = document.createElement('button');
+              rightRoad.innerHTML = 'Road';
+              rightRoad.style.marginLeft = '13px';
+              rightRoad.style.marginTop = '-23px';
+              rightRoad.onclick = function() {
+                currentPlayer.roadMap.addVertex(vertices[max]);
+                currentPlayer.roadMap.addEdge(vertices[index], vertices[max]);
+                var road = buildRoad(currentPlayer, settle, index);
+                leftRoad.remove();
+                rightRoad.remove();
+                topRoad.remove();
+                road.style.marginLeft = '21px';
+                road.style.marginTop = '26px';
+                road.style.transform = 'rotate(30deg)';
+                end = document.createElement('button');
+                end.innerHTML = 'End Turn';
+                end.onclick = function() {
+                              if (count == 3) {
+                                firstTurn = firstTurn;
+                              }
+                              else if (count < 3) {
+                                if (firstTurn < 3) {
+                                  firstTurn ++
+                                }
+                                else {
+                                  firstTurn = 0;
+                                }
+                              }
+                              else if (count > 3) {
+                                if (firstTurn > 0) {
+                                  firstTurn--;
+                                }
+                                else {
+                                  firstTurn = 3;
+                                }
+
+                              }
+                              count++;
+                              this.remove();
+                              for (var l = 0; l < buildList.length; l++) {
+                                if(document.getElementById(l)) {
+                                  //console.log('a');
+                                  document.getElementById(l).style.pointerEvents = 'auto';
+                                }
+                              }
+                              if (count == 8) {
+                                for(var m = 0; m < buildList.length; m++) {
+                                  if(document.getElementById(m)) {
+                                    document.getElementById(m).style.visibility = 'hidden';
+                                    document.getElementById(m).style.pointerEvents = 'none';
+                                  }
+                                }
+                                main();
+                              }
+                           }
+                        document.body.appendChild(end);
+                    }
+            }
+            topRoad = document.createElement('button');
+            topRoad.innerHTML = 'Road';
+            topRoad.style.marginTop = '-65px';
+            topRoad.style.marginLeft = '-19px';
+            topRoad.onclick = function() {
+              currentPlayer.roadMap.addVertex(vertices[min]);
+              currentPlayer.roadMap.addEdge(vertices[index], vertices[min]);
+              var road = buildRoad(currentPlayer, settle, index);
+              road.style.marginTop = '-30px';
+              road.style.marginLeft = '-8px';
+              road.style.transform = "rotate(90deg)";
+              leftRoad.remove();
+              rightRoad.remove();
+              topRoad.remove();
+              end = document.createElement('button');
+              end.innerHTML = 'End Turn';
+              end.onclick = function() {
+
+                            if (count == 3) {
+                              firstTurn = firstTurn;
+                            }
+                            else if (count < 3) {
+                              if (firstTurn < 3) {
+                                firstTurn ++
+                              }
+                              else {
+                                firstTurn = 0;
+                              }
+                            }
+                            else if (count > 3) {
+                              if (firstTurn > 0) {
+                                firstTurn--;
+                              }
+                              else {
+                                firstTurn = 3;
+                              }
+
+                            }
+                            count++;
+                            this.remove();
+                            for (var l = 0; l < buildList.length; l++) {
+                              if(document.getElementById(l)) {
+                                //console.log('a');
+                                document.getElementById(l).style.pointerEvents = 'auto';
+                              }
+                            }
+                            if (count == 8) {
+
+                              main();
+                              for(var m = 0; m < buildList.length; m++) {
+                                if(document.getElementById(m)) {
+                                  document.getElementById(m).style.visibility = 'hidden';
+                                  document.getElementById(m).style.pointerEvents = 'none';
+                                }
+                              }
+                            }
+                      }
+                      document.body.appendChild(end);
+            }
+            leftRoad = document.createElement('button');
+            leftRoad.innerHTML = 'Road';
+            leftRoad.style.marginLeft = '-48px';
+            leftRoad.style.marginTop = '20px';
+            leftRoad.onclick = function() {
+              var road = buildRoad(currentPlayer, settle, index);
+              currentPlayer.roadMap.addVertex(vertices[mid]);
+              currentPlayer.roadMap.addEdge(vertices[index], vertices[mid]);
+              road.style.marginLeft = '-38px';
+              road.style.marginTop = '26px';
+              road.style.transform = "rotate(-30deg)";
+              leftRoad.remove();
+              rightRoad.remove();
+              topRoad.remove();
+              end = document.createElement('button');
+              end.innerHTML = 'End Turn';
+              end.onclick = function() {
+
+                            if (count == 3) {
+                              firstTurn = firstTurn;
+                            }
+                            else if (count < 3) {
+                              if (firstTurn < 3) {
+                                firstTurn ++
+                              }
+                              else {
+                                firstTurn = 0;
+                              }
+                            }
+                            else if (count > 3) {
+                              if (firstTurn > 0) {
+                                firstTurn--;
+                              }
+                              else {
+                                firstTurn = 3;
+                              }
+
+                            }
+                            count++;
+                            this.remove();
+                            for (var l = 0; l < buildList.length; l++) {
+                              if(document.getElementById(l)) {
+                                //console.log('a');
+                                document.getElementById(l).style.pointerEvents = 'auto';
+                              }
+                            }
+                            if (count == 8) {
+
+                              main();
+
+                              for(var m = 0; m < buildList.length; m++) {
+                                if(document.getElementById(m)) {
+                                  document.getElementById(m).style.pointerEvents = 'none';
+                                  document.getElementById(m).style.visibility = 'hidden';
+                                }
+                              }
+                            }
+                      }
+                      document.body.appendChild(end);
+            }
+            settle.appendChild(leftRoad);
+            settle.appendChild(topRoad);
+            settle.appendChild(rightRoad);
+
+            for (var l = 0; l < buildList.length; l++) {
+              if(document.getElementById(l)) {
+                document.getElementById(l).style.pointerEvents = 'none';
+              }
+            }
+
+
+            //console.log('a');
+
+            //settle.style.background = 'blue';
+          }
+          bottomSpace.onclick = function() {
+            var currentPlayer = playerList[firstTurn];
+            var index = buildList.indexOf(this);
+            var get_keys= gameBoard.AdjList.get(vertices[index]);
+            //console.log(get_keys);
+
+            var settle = buildSettlement(currentPlayer, this);
+            settle.style.marginLeft = '39px';
+            settle.style.marginTop ='68px';
+
+            this.parentNode.insertBefore(this.firstChild, this);
+            this.style.visibility = 'hidden';
+            this.style.pointerEvents = 'none';
+            currentPlayer.roadMap.addVertex(vertices[index]);
+            //this.parentNode.removeChild(this);
+            var min = -1;
+            var max = -1;
+            var mid = -1;
+            for (var k of get_keys) {
+              if (vertices.indexOf(k) > max) {
+                min = mid;
+                mid = max;
+                max = vertices.indexOf(k);
+              }
+              else if (vertices.indexOf(k) < max) {
+                if (vertices.indexOf(k) < mid) {
+                  min = vertices.indexOf(k);
+                }
+                else {
+                  min = mid;
+                  mid = vertices.indexOf(k);
+                }
+              }
+              //var adj = vertices.indexOf(board.AdjList.get(k));
+                var adj = vertices.indexOf(k);
+              //removeSpace = buildList[vertices.indexOf(get_keys[k])];
+              removeSpace = document.getElementById(adj);
+              if (removeSpace)
+                removeSpace.style.visibility = 'hidden';
+                removeSpace.style.pointerEvents = 'none';
+            }
+          //  settle.id = index;
+            rightRoad = document.createElement('button');
+            rightRoad.innerHTML = 'Road';
+            rightRoad.style.marginLeft = '13px';
+            rightRoad.style.marginTop = '-80px';
+            rightRoad.onclick = function() {
+              currentPlayer.roadMap.addVertex(vertices[mid]);
+              currentPlayer.roadMap.addEdge(vertices[index], vertices[mid]);
+              var road = buildRoad(currentPlayer, settle,index);
+              leftRoad.remove();
+              rightRoad.remove();
+              botRoad.remove();
+              road.style.marginLeft = '25px';
+              road.style.marginTop = '1px';
+              road.style.transform = 'rotate(-30deg)';
+              end = document.createElement('button');
+              end.innerHTML = 'End Turn';
+              end.onclick = function() {
+                            if (count == 3) {
+                              firstTurn = firstTurn;
+                            }
+                            else if (count < 3) {
+                              if (firstTurn < 3) {
+                                firstTurn ++
+                              }
+                              else {
+                                firstTurn = 0;
+                              }
+                            }
+                            else if (count > 3) {
+                              if (firstTurn > 0) {
+                                firstTurn--;
+                              }
+                              else {
+                                firstTurn = 3;
+                              }
+
+                            }
+                            count++;
+                            this.remove();
+                            for (var l = 0; l < buildList.length; l++) {
+                              if(document.getElementById(l)) {
+                                //console.log('a');
+                                document.getElementById(l).style.pointerEvents = 'auto';
+                              }
+                            }
+                            if (count == 8) {
+                              for(var m = 0; m < buildList.length; m++) {
+
+                                if(document.getElementById(m)) {
+                                  document.getElementById(m).style.visibility = 'hidden';
+                                  document.getElementById(m).style.pointerEvents = 'none';
+                                }
+                              }
+                              main();
+
+                            }
+                      }
+                      document.body.appendChild(end);
+            }
+            botRoad = document.createElement('button');
+            botRoad.innerHTML = 'Road';
+            botRoad.style.marginTop = '5px';
+            botRoad.style.marginLeft = '-19px';
+            botRoad.onclick = function() {
+              currentPlayer.roadMap.addVertex(vertices[max]);
+              currentPlayer.roadMap.addEdge(vertices[index], vertices[max]);
+              var road = buildRoad(currentPlayer, settle);
+              road.style.marginTop = '42px';
+              road.style.marginLeft = '-8px';
+              road.style.transform = "rotate(90deg)";
+              leftRoad.remove();
+              rightRoad.remove();
+              botRoad.remove();
+              end = document.createElement('button');
+              end.innerHTML = 'End Turn';
+              end.onclick = function() {
+
+                            if (count == 3) {
+                              firstTurn = firstTurn;
+                            }
+                            else if (count < 3) {
+                              if (firstTurn < 3) {
+                                firstTurn ++
+                              }
+                              else {
+                                firstTurn = 0;
+                              }
+                            }
+                            else if (count > 3) {
+                              if (firstTurn > 0) {
+                                firstTurn--;
+                              }
+                              else {
+                                firstTurn = 3;
+                              }
+
+                            }
+                            count++;
+                            this.remove();
+                            for (var l = 0; l < buildList.length; l++) {
+                              if(document.getElementById(l)) {
+                                //console.log('a');
+                                document.getElementById(l).style.pointerEvents = 'auto';
+                              }
+                            }
+                            if (count == 8) {
+                              for(var m = 0; m < buildList.length; m++) {
+                                if(document.getElementById(m)) {
+                                  document.getElementById(m).style.visibility = 'hidden';
+                                  document.getElementById(m).style.pointerEvents = 'none';
+                                }
+                              }
+                              main();
+                            }
+                      }
+                      document.body.appendChild(end);
+            }
+            leftRoad = document.createElement('button');
+            leftRoad.innerHTML = 'Road';
+            leftRoad.style.marginLeft = '-48px';
+            leftRoad.style.marginTop = '13px';
+            leftRoad.onclick = function() {
+              currentPlayer.roadMap.addVertex(vertices[min]);
+              currentPlayer.roadMap.addEdge(vertices[index], vertices[min]);
+              var road = buildRoad(currentPlayer, settle, index);
+              road.style.marginLeft = '-39px';
+              road.style.marginTop = '2px';
+              road.style.transform = "rotate(30deg)";
+              leftRoad.remove();
+              rightRoad.remove();
+              botRoad.remove();
+              end = document.createElement('button');
+              end.innerHTML = 'End Turn';
+              end.onclick = function() {
+
+                            if (count == 3) {
+                              firstTurn = firstTurn;
+                            }
+                            else if (count < 3) {
+                              if (firstTurn < 3) {
+                                firstTurn ++
+                              }
+                              else {
+                                firstTurn = 0;
+                              }
+                            }
+                            else if (count > 3) {
+                              if (firstTurn > 0) {
+                                firstTurn--;
+                              }
+                              else {
+                                firstTurn = 3;
+                              }
+
+                            }
+                            count++;
+                            this.remove();
+                            for (var l = 0; l < buildList.length; l++) {
+                              if(document.getElementById(l)) {
+                                //console.log('a');
+                                document.getElementById(l).style.pointerEvents = 'auto';
+                              }
+                            }
+                            if (count == 8) {
+
+                              for(var m = 0; m < buildList.length; m++) {
+                                if(document.getElementById(m)) {
+                                  document.getElementById(m).style.visibility = 'hidden';
+                                  document.getElementById(m).style.pointerEvents = 'none';
+                                }
+                              }
+                              main();
+                            }
+                    }
+                    document.body.appendChild(end);
+            }
+            settle.appendChild(leftRoad);
+            settle.appendChild(botRoad);
+            settle.appendChild(rightRoad);
+
+            for (var l = 0; l < buildList.length; l++) {
+              if(document.getElementById(l)) {
+                document.getElementById(l).style.pointerEvents = 'none';
+              }
+            }
+
+
+        /*    if (count == 3) {
+              firstTurn = firstTurn;
+            }
+            else if (count < 3) {
+              if (firstTurn < 3) {
+                firstTurn ++
+              }
+              else {
+                firstTurn = 0;
+              }
+            }
+            else if (count > 3) {
+              if (firstTurn > 0) {
+                firstTurn--;
+              }
+              else {
+                firstTurn = 3;
+              }
+            }
+            count++;
+            */
+
+          //  settle.style.background = player1.color;
+            //settle.style.background = 'red';
+          }
+          space.style.pointerEvents = 'none';
+          space.style.visibility = 'hidden';
+          bottomSpace.style.pointerEvents = 'none';
+          bottomSpace.style.visibility = 'hidden';
+          availableSpaces[i].appendChild(space);
+          availableSpaces[i].appendChild(bottomSpace);
+        }
+      //  else {
+        //  var space = document.createElement('div');
+        //  var space = document.createElement('div');
+        //  var bottomSpace = document.createElement('div');
+        //  space.classList.add('open_space_right_vertex');
+        //  bottomSpace.classList.add('open_space_bottom_vertex');
+        //  availableSpaces[i].appendChild(space);
+        //  availableSpaces[i].appendChild(bottomSpace);
+        }
+        socket.emit('place');
+    //  }
+  }
+
+  // eenables proper player to choose position to place settlement
+
+
+  function moveRobber(rollDice, build, endTurn, dev, currentPlayer, trade, banktrade) {
+
+    for (var i = 0; i < tiles.length; i++) {
+      tiles[i].style.pointerEvents = 'auto';
+      if (tiles[i].classList.contains('ocean') || tiles[i].classList.contains('robber')) {
+      }
+      else {
+        tiles[i].onclick = function() {
+          for (var j = 0; j < tiles.length; j++) {
+            if (tiles[j].classList.contains('robber')) {
+              tiles[j].classList.remove(getElementsByClassName('robber'))
+            }
+          }
+          //robber = document.createElement('div');
+          console.log('id');
+          console.log(this);
+          for (var k = 0; k< tiles.length; k++) {
+            if (this === tiles[k]) {
+              var id = k;
+            }
+          }
+          socket.emit('robber', {id: id, robber: robber, val: this.val});
+          //this.appendChild(robber);
+          //robberLocation = this.val;
+          console.log('steal');
+          var stealOptions = 0;
+          for (l = 0; l<numPlayers; l++) {
+            if (playerList[l] != currentPlayer) {
+              console.log('ste');
+              if (playerList[l].hexList.includes(this)) {
+                console.log('s');
+                if (playerList[l].totalResources > 0) {
+                  console.log('se');
+                  stealOptions++;
+                  var rob = document.createElement('button');
+                  rob.id = 'p' + l;
+                  rob.col = playerList[l].color;
+                  rob.innerHTML = playerList[l].color;
+                  rob.onclick = function() {
+                    console.log('a');
+                    for (var n = 0; n < numPlayers; n++) {
+                      if (playerList[n].color = this.col) {
+                        var player = playerList[n];
+                      }
+                    }
+                    // generates random nnumber to based on the players resources
+                    rand = Math.floor(Math.random() * player.totalResources);
+
+                    // determines the resource stolen by finding where rand lies on
+                    // the interval of a players different resources starting with wood
+                    // to preserve an increased likelihood of stealing a resource if a
+                    // player contains more of that resource
+                    if (rand < player.resources.wood) {
+                      socket.emit('udpateResources', {player: playerList.indexOf(player), resource: 'wood', val: -1});
+                      socket.emit('updateResources', {player: playerList.indexOf(currentPlayer), resource: 'wood', val: 1});
+
+                    }
+                    else if (rand < (player.resources.wood + player.resources.brick)) {
+                      socket.emit('udpateResources', {player: playerList.indexOf(player), resource: 'brick', val: -1});
+                      socket.emit('updateResources', {player: playerList.indexOf(currentPlayer), resource: 'brick', val: 1});
+                    }
+                    else if (rand < player.resources.wood + player.resources.brick + player.resources.sheep) {
+                      socket.emit('udpateResources', {player: playerList.indexOf(player), resource: 'sheep', val: -1});
+                      socket.emit('updateResources', {player: playerList.indexOf(currentPlayer), resource: 'sheep', val: 1});
+                    }
+                    else if (rand < player.resources.wood + player.resources.brick + player.resources.sheep +
+                      player.resources.wheat) {
+                        socket.emit('udpateResources', {player: playerList.indexOf(player), resource: 'wheat', val: -1});
+                        socket.emit('updateResources', {player: playerList.indexOf(currentPlayer), resource: 'wheat', val: 1});
+                    }
+                    else  {
+                      socket.emit('udpateResources', {player: playerList.indexOf(player), resource: 'ore', val: -1});
+                      socket.emit('updateResources', {player: playerList.indexOf(currentPlayer), resource: 'ore', val: 1});
+                    }
+                    for (var m = 0; m < numPlayers; m++) {
+                      if (document.getElementById('p'+m)) {
+                        document.getElementById('p'+m).remove();
+                      }
+                    }
+                    if (build)
+                      build.disabled = false;
+                    if (dev)
+                      dev.disabled = false;
+                    if (endTurn) {
+                      endTurn.disabled = false;
+                    }
+                    if (bankTrade) {
+                      bankTrade.disabled = false;
+                    }
+                    if (trade) {
+                      trade.disabled = false;
+                    }
+                    else {
+                      rollDice.disabled = false;
+                    }
+                    event.stopPropagation();
+                  }
+                  document.body.appendChild(rob);
+                }
+              }
+            }
+          }
+          if (stealOptions == 0) {
+            console.log('else');
+            if (build)
+              build.disabled = false;
+            if (bankTrade) {
+              bankTrade.disabled = false;
+            }
+            if (dev)
+              dev.disabled = false;
+            if (trade)
+              trade.disabled = false;
+            if (endTurn)
+              endTurn.disabled = false;
+            else {
+              rollDice.disabled = false;
+            }
+            event.stopPropagation();
+          }
+
+        for (var k = 0; k<tiles.length; k++) {
+        tiles[k].style.pointerEvents = 'none';
+        }
+
+        hexes = document.getElementsByClassName('hex');
+        }
+      }
+    }
+  }
+  socket.on('main', function(data) {
+    main(data);
+  });
+  function main(data) {
+    console.log(board.setup);
+    board.setup = false;
+    var build;
+    var devCard;
+    var endTurn;
+    //var firstPlayer = playerList[firstTurn];
+    currentPlayer = playerList[(data.turn + data.firstTurn) % numPlayers];
+    console.log(numPlayers);
+    console.log(currentPlayer);
+    console.log(currentPlayer.devCards.length);
+    for (var f = 0; f < currentPlayer.devCards.length; f++) {
+      console.log('dis');
+      console.log(currentPlayer.devCards[f]);
+      currentPlayer.devCards[f].disabled = false;
+      currentPlayer.devCards[f].onclick = function() {
+        if (this.innerHTML != 'Victory Point') {
+          for (var g = 0; g < currentPlayer.devCards.length; g++) {
+            currentPlayer.devCards[g].disabled = true;
+          }
+          rollDice.disabled = true;
+          if (this.innerHTML == 'Knight') {
+            moveRobber(rollDice, build, endTurn, devCard, currentPlayer, trade, bankTrade);
+            var index = currentPlayer.devCards.indexOf(this);
+            currentPlayer.devCards.splice(index, 1);
+            currentPlayer.knights++;
+            if (!currentPlayer.largestArmy) {
+              if (currentPlayer.knights > 2) {
+                var mostKnights = true;
+                for (var h = 0; h < numPlayers; h++) {
+                  if (currentPlayer != playerList[h]) {
+                    if (currentPlayer.knights < playerList[h]) {
+                      mostKnights = false;
+                    }
+                  }
+                }
+                if (mostKnights) {
+                  currentPlayer.largestArmy = true;
+                  for (var h = 0; h < numPlayers; h++) {
+                    if (currentPlayer != playerList[h]) {
+                        playerList[h].largestArmy = false;
+                    }
+                  }
+                }
+              }
+            }
+            this.remove();
+          }
+          else if (this.innerHTML == 'Road Building') {
+              roads();
+              var index = currentPlayer.devCards.indexOf(this);
+              currentPlayer.devCards.splice(index, 1);
+              this.remove();
+
+          }
+          else if (this.innerHTML = 'Year of Plenty') {
+              board.yearOfPlenty(currentPlayer);
+          }
+          else if (this.innerHTML = 'Monopoly') {
+              board.monopoly(currentPlayer);
+          }
+        }
+      }
+    }
+    var displayRoll = document.createElement('div');
+    displayRoll.setAttribute("id","die");
+    var rollDice = document.createElement('button');
+    rollDice.innerHTML = 'Roll Dice';
+    rollDice.onclick = function() {
+      rollDice.disabled = true;
+      var roll = diceRoll();
+      if (roll == 7) {
+        var endTurn = document.createElement('button');
+        endTurn.innerHTML = 'End Turn';
+        endTurn.onclick = function() {
+          devCard.remove();
+          socket.emit('removeDie');
+          rollDice.remove();
+          trade.remove();
+          bankTrade.remove();
+          build.remove();
+          for (var b = 0; a < currentPlayer.settlementsMap.length; b++) {
+            document.getElementById(board.vertices.indexOf(
+              currentPlayer.settlementsMap[b])).style.visibility = 'hidden';
+            document.getElementById(board.vertices.indexOf(currentPlayer.settlementsMap[b])).style.pointerEvents = 'none';
+          }
+          for (var c = 0; c < buildList.length; c++) {
+            if (document.getElementById(c)) {
+              document.getElementById(c).style.visibility = 'hidden';
+              document.getElementById(c).style.pointerEvents = 'none';
+            }
+          }
+          for (var a = 0; a < currentPlayer.settlements.length; a++) {
+            currentPlayer.settlements[a].disabled = true;
+          }
+          for (var i = 0; i < board.vertices.length; i++) {
+            for (var j =0; j< board.vertices.length; j++) {
+              //console.log('r'+i +'r' + j);
+              if (document.getElementById('r'+i+'r'+j)) {
+                var node = document.getElementById('r'+i+'r'+j);
+                if ((document.getElementById('r'+i+'r'+j).childNodes[1])) {
+                  //console.log('a');
+                  //console.log(node);
+                //  console.log(node.parentNode);
+                //  console.log(node.childNodes);
+                  node.parentNode.insertBefore(node.childNodes[1], node);
+                }
+
+                 document.getElementById('r'+i + 'r' + j).remove();
+              }
+            }
+          }
+          endTurn.remove();
+          socket.emit('nextTurn');
+        }
+        document.body.appendChild(endTurn);
+        endTurn.disabled = 'true';
+        var build = document.createElement('button');
+        build.innerHTML = 'Build';
+        build.onclick = function() {
+            playerBuild(this, currentPlayer);
+        }
+        document.body.appendChild(build);
+        build.disabled = 'true';
+        var devCard = document.createElement('button');
+        devCard.innerHTML = 'Development Card';
+        devCard.onclick = function() {
+          buyDev(currentPlayer);
+        }
+        var trade = document.createElement('button');
+        trade.disabled = true;
+        trade.innerHTML = 'Player Trade';
+        trade.onclick = function() {
+          this.disabled = true;
+          board.playerTrade(currentPlayer, trade);
+        }
+        document.body.appendChild(trade);
+        document.body.appendChild(devCard);
+        var bankTrade = document.createElement('button');
+        bankTrade.disabled = true;
+        bankTrade.innerHTML = 'Bank Trade';
+        bankTrade.onclick = function() {
+          this.disabled = true;
+          board.bankTrade(currentPlayer, bankTrade);
+        }
+        document.body.appendChild(bankTrade);
+        devCard.disabled = 'true';
+        for (var i = 0; i < playerList.length; i++) {
+          if (playerList[i].totalResources > 7) {
+            console.log('resssss');
+            socket.emit('discard', {player: i, card: playerList[i].totalResources});
+          }
+        }
+        moveRobber(rollDice, build, endTurn, devCard, currentPlayer, trade, bankTrade);
+
+      }
+      else {
+        socket.emit('distribute', {roll: roll});
+        //distributeResources(roll);
+        var endTurn = document.createElement('button');
+        endTurn.innerHTML = 'End Turn';
+        endTurn.onclick = function() {
+          socket.emit('removeDie');
+          devCard.remove();
+          rollDice.remove();
+          build.remove();
+          trade.remove();
+          bankTrade.remove();
+          for (var b = 0; b < currentPlayer.settlementsMap.length; b++) {
+            document.getElementById(board.vertices.indexOf(
+            currentPlayer.settlementsMap[b])).style.visibility = 'hidden';
+            document.getElementById(board.vertices.indexOf(currentPlayer.settlementsMap[b])).style.pointerEvents = 'none';
+          }
+          for (var c = 0; c < buildList.length; c++) {
+            if (document.getElementById(c)) {
+              document.getElementById(c).style.visibility = 'hidden';
+              document.getElementById(c).style.pointerEvents = 'none';
+            }
+          }
+          for (var a = 0; a < currentPlayer.settlements.length; a++) {
+            currentPlayer.settlements[a].disabled = true;
+          }
+          for (var i = 0; i < board.vertices.length; i++) {
+            for (var j =0; j< board.vertices.length; j++) {
+              //console.log('r'+i +'r' + j);
+              if (document.getElementById('r'+i+'r'+j)) {
+                var node = document.getElementById('r'+i+'r'+j);
+                if ((document.getElementById('r'+i+'r'+j).childNodes[1])) {
+                  //console.log('a');
+                  //console.log(node);
+                //  console.log(node.parentNode);
+                //  console.log(node.childNodes);
+                  node.parentNode.insertBefore(node.childNodes[1], node);
+                }
+
+                 document.getElementById('r'+i + 'r' + j).remove();
+              }
+            }
+          }
+          endTurn.remove();
+          socket.emit('nextTurn');
+          //turn++;
+        }
+        document.body.appendChild(endTurn);
+        var build = document.createElement('button');
+        build.innerHTML = 'Build';
+        build.onclick = function() {
+            playerBuild(this, currentPlayer);
+        }
+        document.body.appendChild(build);
+        var devCard = document.createElement('button');
+        devCard.innerHTML = 'Development Card';
+        devCard.onclick = function() {
+          buyDev(currentPlayer);
+        }
+        document.body.appendChild(devCard);
+
+        var trade = document.createElement('button');
+        trade.innerHTML = 'Player Trade';
+        trade.onclick = function() {
+          board.playerTrade(currentPlayer);
+        }
+        document.body.appendChild(trade);
+        var bankTrade = document.createElement('button');
+        bankTrade.innerHTML = 'Bank Trade';
+        bankTrade.onclick = function() {
+          this.disabled = true;
+          board.bankTrade(currentPlayer, bankTrade);
+        }
+        document.body.appendChild(bankTrade);
+      }
+
+      }
+      document.body.appendChild(rollDice);
+      document.body.appendChild(displayRoll);
+    }
+
+    // resources need to =be removed from player on all clients
+    socket.on('returnDev', function(data) {
+      console.log(data.turn);
+      //playerList[data.turn].devCards.push(data.card);
+      playerList[data.turn].removeResources('sheep', 1);
+      playerList[data.turn].removeResources('wheat', 1);
+      playerList[data.turn].removeResources('ore', 1);
+      board.displayResources();
+      console.log(currentPlayer.devCards);
+    });
+
+  socket.on('addCard', function(data) {
+    var dev = document.createElement('button');
+    playerList[data.turn].devCards.push(dev);
+    dev.innerHTML = data.card;
+    dev.disabled = true;
+    dev.style.display = 'block';
+    document.body.appendChild(dev);
+  });
+
+  function buyDev(player) {
+    if (player.resources.wheat >= 1 && player.resources.ore >= 1 && player.resources.sheep >= 1) {
+      console.log(playerList.indexOf(player));
+      socket.emit('dev', {turn: playerList.indexOf(player)});
+      //card = dev_cards.pop();
+      //player.devCards.push(card);
+      //console.log(player.devCards);
+    }
+    else {
+      alert('Not enough resources');
+    }
+  }
+  function distributeResources(roll) {
+      for (var i = 0; i < tiles.length; i++) {
+        console.log(robberLocation);
+        if (robberLocation != i) {
+          if (tiles[i].value == roll) {
+            console.log('yes');
+            for (var j = 0; j < playerList.length; j++) {
+              console.log(playerList[j].hexList);
+              if (playerList[j].hexList.includes(tiles[i])) {
+                console.log(playerList[j].hexList);
+                for (var k = 0; k< playerList[j].hexList.length; k++) {
+                  if (playerList[j].hexList[k] == tiles[i]) {
+                    playerList[j].updateResources(tiles[i].resource, 1);
+                    //playerList[j].resources[tiles[i].resource]+= 1;
+                    console.log(playerList[j].resources);
+                  }
+                }
+                //player.resource.add(hex[i]);
+              }
+            }
+          }
+        }
+    }
+    board.displayResources();
+  }
+  function playerBuild(build, currentPlayer) {
+    console.log('playerBuild');
+    build.disabled = 'true';
+    for (var a = 0; a < currentPlayer.settlements.length; a++) {
+      console.log('sett');
+      console.log(currentPlayer.settlements[a]);
+      currentPlayer.settlements[a].style.pointerEvents = 'auto';
+      currentPlayer.settlements[a].onclick = function() {
+        console.log('cityyy');
+        if (!this.classList.contains('city')) {
+          console.log('cit');
+          console.log(currentPlayer.settlements.indexOf(this));
+          console.log(this);
+          console.log(currentPlayer.settlements[currentPlayer.settlements.indexOf(this)])
+          socket.emit('buildCity', {player: playerList.indexOf(currentPlayer), settle: currentPlayer.settlements.indexOf(this)});
+          stopPropagation();
+          //buildCity(currentPlayer, this);
+        }
+      }
+    }
+    console.log(currentPlayer.roadMap.AdjList.keys());
+    for (let key of currentPlayer.roadMap.AdjList.keys()) {
+      console.log(key);
+      settleAvailable = true;
+      //console.log(board.gameBoard);
+      console.log(gameBoard.AdjList.get(key));
+      adjSpaces = gameBoard.AdjList.get(key);
+      //console.log(adjSpaces);
+      //console.log(currentPlayer.settlements);
+      for (var c = 0; c <adjSpaces.length; c++) {
+        for (var d = 0; d < playerList.length; d++) {
+          if (playerList[d].settlementsMap.includes(adjSpaces[c]) || playerList[d].settlementsMap.includes(key)) {
+            settleAvailable = false;
+            console.log('not');
+          }
+        }
+      }
+      if (settleAvailable == true) {
+
+        document.getElementById(board.vertices.indexOf(key)).style.visibility = 'visible';
+        document.getElementById(board.vertices.indexOf(key)).style.pointerEvents = 'auto';
+        document.getElementById(board.vertices.indexOf(key)).onclick = function() {
+          //var settle = buildSettlement(currentPlayer, this);
+          if (board.vertices.indexOf(key) % 2 == 0) {
+            if (board.vertices.indexOf(key) < 7 || (board.vertices.indexOf(key) > 15
+            && board.vertices.indexOf(key)) < 28 || board.vertices.indexOf(key) > 39) {
+              socket.emit('bottom', {id: board.vertices.indexOf(key), turn: playerList.indexOf(currentPlayer)});
+            }
+            else {
+              socket.emit('space', {id: board.vertices.indexOf(key), turn: playerList.indexOf(currentPlayer)});
+            }
+          }
+          else {
+            if (board.vertices.indexOf(key) < 7 || (board.vertices.indexOf(key) > 15
+            && board.vertices.indexOf(key)) < 28 || board.vertices.indexOf(key) > 39) {
+              socket.emit('space', {id: board.vertices.indexOf(key), turn: playerList.indexOf(currentPlayer)});
+            }
+            else {
+              socket.emit('bottom', {id: board.vertices.indexOf(key), turn: playerList.indexOf(currentPlayer)});
+            }
+          }
+
+          //this.parentNode.insertBefore(settle, this);
+          this.style.visibility = 'hidden';
+          this.style.pointerEvents = 'none';
+        //  console.log('settle');
+        }
+        }
+      }
+
+    // used to prevent an edge from being counted twice
+    var availableRoads = [];
+    // loops  through all buildable vertices on board
+    for (var i = 0; i < board.vertices.length; i++) {
+      if (currentPlayer.roadMap.AdjList.has(board.vertices[i])) {
+        // gets adjacent edges to a players current roads
+        var get_keys = gameBoard.AdjList.get(board.vertices[i]);
+        console.log(get_keys);
+        // loops through all adjacent roads and checks if they are available
+        for (var j of get_keys) {
+          // checks if this edge has already been checked
+          if (availableRoads[board.vertices.indexOf(j) + i]) {
+            available = false;
+          }
+          else {
+            availableRoads[i+ board.vertices.indexOf(j)] = true;
+              console.log(j);
+            var available = true;
+            for (k = 0; k < 4; k++) {
+                if (playerList[k].roadMap.AdjList.has(j)) {
+                  for (var l of playerList[k].roadMap.AdjList.get(j)) {
+                    if (l == board.vertices[i]) {
+
+                      available = false;
+                    }
+                  }
+                }
+              }
+            }
+
+          //  else {
+            //  if (currentPlayer.roadMap.has(j)) {
+            //    available = false;
+            //  }
+          if (available == true) {
+            //  console.log('road available');
+              var road = document.createElement('button');
+              road.id = 'r' + i +'r' + board.vertices.indexOf(j);
+              road.index = board.vertices.indexOf(j);
+              road.edgeIndex = i;
+            //  console.log(road.id);
+              road.innerHTML = 'Road';
+              road.style.visibility = 'visible';
+              road.style.pointerEvents = 'auto';
+              road.onclick = function() {
+                console.log(currentPlayer.resources.brick);
+                console.log(currentPlayer.resources.wood);
+                if (currentPlayer.resources.brick >=0 && currentPlayer.resources.wood >= 0) {
+                  console.log('roadbuilc');
+                  console.log(this.edgeIndex);
+
+                  build.disabled = false;
+                  if (this.edgeIndex % 2 == 0) {
+                    if (this.edgeIndex <7 || (this.edgeIndex < 38 && this.edgeIndex > 15) || (this.edgeIndex>46)) {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        console.log('rightRoad');
+                        socket.emit('rightRoad', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index- this.edgeIndex == -1) {
+                        console.log('leftRoad');
+                        socket.emit('leftRoad', {leftKey: this.index,turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                      else {
+                        console.log('ye');
+                        socket.emit('botRoad', {botKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                    }
+                    else {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        socket.emit('rightRoadRightSpace', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index - this.edgeIndex == -1) {
+                        socket.emit('LeftRoadRightSpace', {leftKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else {
+                        socket.emit('topRoad', {topKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                    }
+                  }
+                  else {
+                    if (this.edgeIndex < 7 || (this.edgeIndex < 38 && this.edgeIndex > 15) || (this.edgeIndex>46)) {
+                      if (this.index - this.edgeIndex == 1) {
+                        console.log('rightRoadRightSpace');
+                        socket.emit('rightRoadRightSpace', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index - this.edgeIndex == -1) {
+                        console.log('leftRoadleftSpace');
+                      socket.emit('leftRoadRightSpace', {leftKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else {
+                        socket.emit('topRoad', {topKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                    }
+                    else {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        console.log('rightRoad');
+                        socket.emit('rightRoad', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index- this.edgeIndex == -1) {
+                        console.log('leftRoad');
+                        socket.emit('leftRoad', {leftKey: this.index,turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                      else {
+                        console.log('ye');
+                          socket.emit('topRoad', {botKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                        }
+                      }
+                    }
+                  event.stopPropagation();
+                  // adds a vertex to a players road map if it is not already contained
+                ///  if (!currentPlayer.roadMap.AdjList.has(board.vertices[this.index])) {
+                    //currentPlayer.roadMap.addVertex(board.vertices[this.index]);
+                  //}
+                  // adds edge correlating to the two vertices the road lies between
+                  //currentPlayer.roadMap.addEdge(board.vertices[this.edgeIndex], board.vertices[this.index]);
+                  // hides the button to build road and shows the built road
+                  //this.style.visibility = 'hidden';
+                  //this.style.pointerEvents = 'none';
+                  //roads.style.visibility = 'visible';
+                  //aligns road on board
+                //  roads.style.marginLeft = this.left + "px";
+                  //roads.style.marginTop = this.top +'px';
+                  //roads.style.transform = "rotate(" + this.rot + "deg)";
+
+                  for (var i = 0; i < board.vertices.length; i++) {
+                    for (var j =0; j< board.vertices.length; j++) {
+
+                      if (document.getElementById('r'+i+'r'+j)) {
+                        var node = document.getElementById('r'+i+'r'+j);
+                        if ((document.getElementById('r'+i+'r'+j).childNodes[1])) {
+                          node.parentNode.insertBefore(node.childNodes[1], node);
+                        }
+                        //  console.log(document.getElementById('r'+ i + 'r'+j));
+                         document.getElementById('r'+i + 'r' + j).remove();
+                      }
+                    }
+                  }
+                }
+              else {
+                alert('Not enough resources');
+              }
+              // prevents the onclick events of parent elements from executing
+              event.stopPropagation();
+            }
+              // determines the spot of the vertex so that the positions of the
+              // roads and buttons can be correctly placed
+              if (i % 2 == 0) {
+                if (i <7 || (i < 28 && i > 15) || (i>39)) {
+                  if (board.vertices.indexOf(j) - i == 1 ) {
+                    console.log('a');
+                    road.style.marginTop = '-20px';
+                    road.style.marginLeft = '23px';
+                    road.rot = -30;
+                    road.left = 0;
+                    road.top = 0;
+                  }
+                  else if (board.vertices.indexOf(j)- i == -1) {
+                    console.log('b');
+                    road.style.marginTop = '-18px';
+                    road.style.marginLeft = '-25px';
+                    road.rot = 30;
+                    road.left = -15;
+                    road.top = 4;
+                  }
+                  else {
+                    console.log('ye');
+                    road.style.marginTop = '45px';
+                    road.style.marginLeft = '-17px';
+                      road.rot = 90;
+                      road.left = -4;
+                      road.top = 20;
+                  }
+                }
+                else {
+                  if (board.vertices.indexOf(j) - i == 1 ) {
+                    console.log('g');
+                    road.style.marginTop = '2px';
+                    road.style.marginLeft = '34px';
+                    road.rot = 30;
+                    road.left = 20;
+                    road.top = -5;
+                  }
+                  else if (board.vertices.indexOf(j)- i == -1) {
+                    console.log('c');
+                    road.style.marginTop = '2px';
+                    road.style.marginLeft = '-37px';
+                    road.rot = -30;
+                    road.left = -20;
+                    road.top = 6;
+                  }
+                  else {
+                    console.log('d');
+                    road.style.marginTop = '-7px';
+                    road.style.marginLeft = '-8px';
+                    road.rot = 90;
+                    road.left = -5;
+                    road.top = -20;
+
+                  }
+                }
+              }
+              else {
+                if (i < 7 || (i < 28 && i > 15) || (i>39)) {
+                  if (board.vertices.indexOf(j) - i == 1 ) {
+                    console.log('mov');
+                    road.style.marginTop = '-18px';
+                    road.style.marginLeft = '32px';
+                    road.rot = 30;
+                  }
+                  else if (board.vertices.indexOf(j)- i == -1) {
+                    road.style.marginTop = '14px';
+                    road.style.marginLeft = '-35px';
+                      road.rot = -30;
+                      road.left = -29;
+                      road.top = 7;
+                  }
+                  else {
+                    road.style.marginTop = '-15px';
+                    road.rot = 90;
+                    road.top = -15;
+                    road.left = -6;
+                  }
+                }
+                else {
+                  if (board.vertices.indexOf(j) - i == 1 ) {
+                    console.log('yy');
+                    road.style.marginTop = '-30px';
+                    road.style.marginLeft = '23px';
+                    road.rot = -30;
+                    road.left = 20;
+                  }
+                  else if (board.vertices.indexOf(j)- i == -1) {
+                    road.style.marginTop = '-15px';
+                    road.style.marginLeft = '-25px';
+                    road.rot = 30;
+                  }
+                  else {
+                    console.log("ro");
+                    road.style.marginTop = '-9px';
+                    road.style.marginLeft = '-7px';
+                    road.rot = 90;
+                    road.top = 36;
+                    road.left = -9;
+                  }
+                }
+
+            //  }
+              }
+
+              if(document.getElementById(i)) {
+              document.getElementById(i).appendChild(road);
+              //document.getElementById(i).style.visibility = 'visible';
+              }
+            }
+          }
+
+        }
+
+      }
+  }
+  function roads() {
+    // loops  through all buildable vertices on board
+    for (var i = 0; i < board.vertices.length; i++) {
+      if (currentPlayer.roadMap.AdjList.has(board.vertices[i])) {
+        // gets adjcent edes to a players current roads
+        var get_keys = gameBoard.AdjList.get(board.vertices[i]);
+        // loops through all adjacent roads and checks if they are available
+        for (var j of get_keys) {
+          var available = true;
+          for (k = 0; k < 4; k++) {
+              if (playerList[k].roadMap.AdjList.has(j)) {
+                for (var l of playerList[k].roadMap.AdjList.get(j)) {
+                  if (l == board.vertices[i]) {
+                    available = false;
+                  }
+                }
+              }
+          }
+          //  else {
+            //  if (currentPlayer.roadMap.has(j)) {
+            //    available = false;
+            //  }
+          if (available == true) {
+            //  console.log('road available');
+              var road = document.createElement('button');
+              road.id = 'r' + i +'r' + board.vertices.indexOf(j);
+              road.index = board.vertices.indexOf(j);
+              road.edgeIndex = i;
+            //  console.log(road.id);
+              road.innerHTML = 'Road';
+              road.style.visibility = 'visible';
+              road.style.pointerEvents = 'auto';
+              road.onclick = function() {
+                console.log(currentPlayer.resources.brick);
+                console.log(currentPlayer.resources.wood);
+                if (currentPlayer.resources.brick >=0 && currentPlayer.resources.wood >= 0) {
+                  console.log('roadbuilc');
+                  console.log(this.edgeIndex);
+
+                  build.disabled = false;
+                  if (this.edgeIndex % 2 == 0) {
+                    if (this.edgeIndex <7 || (this.edgeIndex < 38 && this.edgeIndex > 15) || (this.edgeIndex>46)) {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        console.log('rightRoad');
+                        socket.emit('rightRoad', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index- this.edgeIndex == -1) {
+                        console.log('leftRoad');
+                        socket.emit('leftRoad', {leftKey: this.index,turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                      else {
+                        console.log('ye');
+                        socket.emit('botRoad', {botKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                    }
+                    else {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        socket.emit('rightRoadRightSpace', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index - this.edgeIndex == -1) {
+                        socket.emit('LeftRoadRightSpace', {leftKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else {
+                        socket.emit('topRoad', {topKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                    }
+                  }
+                  else {
+                    if (this.edgeIndex < 7 || (this.edgeIndex < 38 && this.edgeIndex > 15) || (this.edgeIndex>46)) {
+                      if (this.index - this.edgeIndex == 1) {
+                        console.log('rightRoadRightSpace');
+                        socket.emit('rightRoadRightSpace', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index - this.edgeIndex == -1) {
+                        console.log('leftRoadleftSpace');
+                      socket.emit('leftRoadRightSpace', {leftKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else {
+                        socket.emit('topRoad', {topKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                    }
+                    else {
+                      if (this.index - this.edgeIndex == 1 ) {
+                        console.log('rightRoad');
+                        socket.emit('rightRoad', {rightKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex});
+                      }
+                      else if (this.index- this.edgeIndex == -1) {
+                        console.log('leftRoad');
+                        socket.emit('leftRoad', {leftKey: this.index,turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                      }
+                      else {
+                        console.log('ye');
+                          socket.emit('topRoad', {botKey: this.index, turn: playerList.indexOf(currentPlayer), id: this.edgeIndex})
+                        }
+                      }
+                    }
+                  event.stopPropagation();
+
+                  for (var i = 0; i < board.vertices.length; i++) {
+                    for (var j =0; j< board.vertices.length; j++) {
+
+                      if (document.getElementById('r'+i+'r'+j)) {
+                        var node = document.getElementById('r'+i+'r'+j);
+                        if ((document.getElementById('r'+i+'r'+j).childNodes[1])) {
+                          node.parentNode.insertBefore(node.childNodes[1], node);
+                        }
+                        //  console.log(document.getElementById('r'+ i + 'r'+j));
+                         document.getElementById('r'+i + 'r' + j).remove();
+                      }
+                    }
+                  }
+                }
+              else {
+                alert('Not enough resources');
+              }
+              // prevents the onclick events of parent elements from executing
+              event.stopPropagation();
+            }
+            if(document.getElementById(i)) {
+              document.getElementById(i).appendChild(road);
+            //document.getElementById(i).style.visibility = 'visible';
+            }
+          }
+        }
+      }
+    }
+  }
+  function checkForWin() {
+    //TODO calculate points checking for largest army and longestRoad
+    if (p1_points == 10) {
+      return true;
+    }
+    else if (p2_points == 10) {
+      return true;
+    }
+    else if (p3_points == 10) {
+      return true;
+    }
+    else if (p3_points == 10) {
+      return true;
+    }
+    else if (p4_points == 10) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  // adds tiles and ports to a player based on where a settlement has been built
+  function addHex(player, node) {
+    var index = buildList.indexOf(node);
+    switch (index) {
+      case 0:
+       player.hexList.push(document.getElementsByClassName('hex')[5]);
+       player.ports.push(portsList[0]);
+        break;
+      case 1:
+        player.hexList.push(document.getElementsByClassName('hex')[5]);
+        player.ports.push(portsList[0]);
+        break;
+      case 2:
+        player.hexList.push(document.getElementsByClassName('hex')[5]);
+        player.hexList.push(document.getElementsByClassName('hex')[6]);
+        break;
+      case 3:
+        player.hexList.push(tiles[6]);
+        player.ports.push(portsList[1]);
+        break;
+      case 4:
+        player.hexList.push(tiles[6]);
+        player.hexList.push(tiles[7]);
+        player.ports.push(portsList[1]);
+        break;
+      case 5:
+        player.hexList.push(tiles[7]);
+        break;
+      case 6:
+        player.hexList.push(tiles[7]);
+        break;
+      case 7:
+        player.hexList.push(tiles[10]);
+        player.ports.push(portsList[3]);
+        break;
+      case 8:
+        player.hexList.push(tiles[10]);
+        player.hexList.push(tiles[5]);
+        break;
+      case 9:
+        player.hexList.push(tiles[5]);
+        player.hexList.push(tiles[10]);
+        player.hexList.push(tiles[11]);
+        break;
+      case 10:
+        player.hexList.push(tiles[5]);
+        player.hexList.push(tiles[6]);
+        player.hexList.push(tiles[11]);
+        break;
+      case 11:
+        player.hexList.push(tiles[6]);
+        player.hexList.push(tiles[11]);
+        player.hexList.push(tiles[12]);
+        break;
+      case 12:
+        player.hexList.push(tiles[6]);
+        player.hexList.push(tiles[7]);
+        player.hexList.push(tiles[12]);
+        break;
+      case 13:
+        player.hexList.push(tiles[12]);
+        player.hexList.push(tiles[13]);
+        player.hexList.push(tiles[7]);
+        break;
+      case 14:
+        player.hexList.push(tiles[7]);
+        player.hexList.push(tiles[13]);
+        player.ports.push(portsList[2]);
+        break;
+      case 15:
+        player.hexList.push(tiles[13]);
+        player.ports.push(portsList[2]);
+        break;
+      case 16:
+        player.hexList.push(tiles[16]);
+        break;
+      case 17:
+        player.hexList.push(tiles[16]);
+        player.hexList.push(tiles[10]);
+        player.ports.push(portsList[3]);
+        break;
+      case 18:
+        player.hexList.push(tiles[16]);
+        player.hexList.push(tiles[17]);
+        player.hexList.push(tiles[10]);
+        break;
+      case 19:
+        player.hexList.push(tiles[17]);
+        player.hexList.push(tiles[10]);
+        player.hexList.push(tiles[11]);
+        break;
+      case 20:
+        player.hexList.push(tiles[11]);
+        player.hexList.push(tiles[18]);
+        player.hexList.push(tiles[17]);
+        break;
+      case 21:
+        player.hexList.push(tiles[11]);
+        player.hexList.push(tiles[12]);
+        player.hexList.push(tiles[18]);
+        break;
+      case 22:
+        player.hexList.push(tiles[12]);
+        player.hexList.push(tiles[18]);
+        player.hexList.push(tiles[19]);
+        break;
+      case 23:
+        player.hexList.push(tiles[19]);
+        player.hexList.push(tiles[12]);
+        player.hexList.push(tiles[13]);
+      case 24:
+        player.hexList.push(tiles[19]);
+        player.hexList.push(tiles[20]);
+        player.hexList.push(tiles[13]);
+        break;
+      case 25:
+        player.hexList.push(tiles[20]);
+        player.hexList.push(tiles[13]);
+        break;
+      case 26:
+        player.hexList.push(tiles[20]);
+        player.ports.push(portsList[4]);
+        break;
+      case 27:
+        player.hexList.push(tiles[16]);
+      case 28:
+        player.hexList.push(tiles[16]);
+        player.hexList.push(tiles[23]);
+        player.ports.push(portsList[5]);
+        break;
+      case 29:
+        player.hexList.push(tiles[16]);
+        player.hexList.push(tiles[17]);
+        player.hexList.push(tiles[23]);
+        break;
+      case 30:
+        player.hexList.push(tiles[17]);
+        player.hexList.push(tiles[23]);
+        player.hexList.push(tiles[24]);
+        break;
+      case 31:
+        player.hexList.push(tiles[17]);
+        player.hexList.push(tiles[18]);
+        player.hexList.push(tiles[24]);
+        break;
+      case 32:
+        player.hexList.push(tiles[24]);
+        player.hexList.push(tiles[25]);
+        player.hexList.push(tiles[18]);
+        break;
+      case 33:
+        player.hexList.push(tiles[19]);
+        player.hexList.push(tiles[18]);
+        player.hexList.push(tiles[25]);
+        break;
+      case 34:
+        player.hexList.push(tiles[25]);
+        player.hexList.push(tiles[26]);
+        player.hexList.push(tiles[19]);
+        break;
+      case 35:
+        player.hexList.push(tiles[19]);
+        player.hexList.push(tiles[20]);
+        player.hexList.push(tiles[26]);
+        break;
+      case 36:
+        player.hexList.push(tiles[20]);
+        player.hexList.push(tiles[26]);
+        break;
+      case 37:
+        player.hexList.push(tiles[20]);
+        player.ports.push(portsList[4]);
+        break;
+      case 38:
+        player.hexList.push(tiles[23]);
+        player.ports.push(portsList[5]);
+        break;
+      case 39:
+        player.hexList.push(tiles[23]);
+        player.hexList.push(tiles[29]);
+        break;
+      case 40:
+        player.hexList.push(tiles[23]);
+        player.hexList.push(tiles[29]);
+        player.hexList.push(tiles[24]);
+        break;
+      case 41:
+        player.hexList.push(tiles[29]);
+        player.hexList.push(tiles[24]);
+        player.hexList.push(tiles[30]);
+        break;
+      case 42:
+        player.hexList.push(tiles[24]);
+        player.hexList.push(tiles[25]);
+        player.hexList.push(tiles[30]);
+        break;
+      case 43:
+        player.hexList.push(tiles[31]);
+        player.hexList.push(tiles[30]);
+        player.hexList.push(tiles[25]);
+        break;
+      case 44:
+        player.hexList.push(tiles[25]);
+        player.hexList.push(tiles[26]);
+        player.hexList.push(tiles[31]);
+        break;
+      case 45:
+        player.hexList.push(tiles[31]);
+        player.hexList.push(tiles[26]);
+        player.ports.push(portsList[6]);
+        break;
+      case 46:
+        player.hexList.push(tiles[26]);
+        player.ports.push(portsList[6]);
+        break;
+      case 47:
+        player.hexList.push(tiles[29]);
+        player.ports.push(portsList[7]);
+        break;
+      case 48:
+        player.hexList.push(tiles[29]);
+        player.ports.push(portsList[7]);
+        break;
+      case 49:
+        player.hexList.push(tiles[29]);
+        player.hexList.push(tiles[30]);
+        break;
+      case 50:
+        player.hexList.push(tiles[30]);
+        player.ports.push(portsList[8]);
+        break;
+      case 51:
+        player.hexList.push(tiles[30]);
+        player.hexList.push(tiles[31]);
+        player.ports.push(portsList[8]);
+        break;
+      case 52:
+        player.hexList.push(tiles[31]);
+        break;
+      case 53:
+        player.hexList.push(tiles[31]);
+        break;
+    }
+
+    //console.log(player.hexList);
+  }
+
+/*
+  function buildSettlement(player, node) {
+    if (setup == true) {
+      var settlement = document.createElement('div');
+      settlement.classList.add('settlement');
+      settlement.style.background = player.color;
+      //node.appendChild(settlement);
+      player.settlementsMap.push(vertices[buildList.indexOf(node)]);
+      player.settlements.push(settlement);
+      if (player.settlements.length == 2) {
+          currentHexes = player.hexList.length;
+          addHex(player, node);
+          for (var i = currentHexes; i < player.hexList.length; i++) {
+            player.resources[player.hexList[i].resource]+=1;
+            console.log(player.resources);
+          }
+      }
+      else {
+      //  addHex(player, node);
+      }
+      return settlement;
+    }
+    else {
+      if (player.resources.wood >= 1 && player.resources.sheep >= 1 &&
+        player.resources.brick >= 1 && player.resources.wheat >=1) {
+        var settlement = document.createElement('div');
+        settlement.classList.add('settlement');
+        settlement.style.background = player.color;
+        node.appendChild(settlement);
+        player.settlementsMap.push(vertices[buildList.indexOf(node)]);
+        player.settlements.push(settlement);
+        addHex(player, node);
+        player.resources.wood -= 1;
+        player.resouces.wheat -= 1;
+        player.resources.brick -= 1;
+        player.resources.sheep -= 1;
+        return settlement;
+      }
+    }
+    //var x = node.parentNode.nodeName;
+  //  x.classList.add('settlement');
+  ///  var settlement = document.createElement('div');
+  //  settlement.classList.add('settlement');
+  //  node.appendChild(settlement);
+  }
+
+  function buildRoad(player, node) {
+    if (setup == true) {
+      var road = document.createElement('div');
+      road.classList.add('road');
+      road.style.background = player.color;
+      node.appendChild(road);
+      console.log('v');
+      //player.playerRoads.push(vertices[index]);
+      //console.log(player.playerRoads);
+      return road;
+    }
+    else {
+        var road = document.createElement('div');
+        road.classList.add('road');
+        road.style.background = player.color;
+        node.appendChild(road);
+        player.resources.wood -= 1;
+        player.resources.brick -= 1;
+        return road;
+    }
+  }
+*/
+  function diceRoll() {
+    var roll = (Math.floor(Math.random()*6)+1) + (Math.floor(Math.random()*6)+1);
+    //document.getElementById('die').innerHTML = '<h1>' + roll + '</h1>';
+    //document.body.appendChild(document.getElementById('die'));
+    socket.emit('displayRoll', {roll: roll
+    });
+    return roll;
+  }
+  socket.on('Roll', function(data) {
+    console.log('roll');
+    displayRoll = document.createElement('div');
+    displayRoll.id = 'display';
+    displayRoll.innerHTML = '<h1>' + data.roll + '</h1>';
+    document.body.appendChild(displayRoll);
+    //displayRoll(data);
+  });
+  socket.on('removeRoll', function(data) {
+    document.getElementById('display').remove();
+  });
+
+    var start = function() {
+      console.log('a');
+      socket.emit('newGame');
+    }
+
+  </script>
+      <h1>Catan Game</h1>
+  </head>
+
+  <body>
+        <button onclick = "start(), this.parentNode.removeChild(this)";>New Game</button>
+        <video id = 'video' autoplay></video>
+        <canvas id = 'canvas'></canvas<br>
+          <div id = 'users'></div>
+          </div>
+
+          <div id = catan_board>
+        <script type = "text/javascript">
+          var video = document.getElementById('video');
+          var canvas = document.getElementById('canvas');
+          var context = canvas.getContext('2d');
+
+          //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.
+         //mozGetUserMedia || navigator.oGetUserMedia || navigator.msGetUserMedia;
+
+        //  if(navigator.getUserMedia) {
+        //   navigator.getUserMedia({video: true, audio:true}, streamWebCam, throwError);
+        //  }
+
+
+/*const videoConstraints = {
+    height: window.innerHeight / 2,
+    width: window.innerWidth / 2
+};
+
+socket.on('addPlayer', function(data) {
+  console.log('add');
+  useEffect(data);
+});
+    //  const Room = (props) => {
+     var peers;
+     var setPeers;
+    //  const socketRef = useRef();
+    //  const userVideo = useRef();
+    //  const peersRef = useRef([]);
+      const roomID = 'room';
+
+
+
+      function useEffect(data) {
+          //navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true }).then(stream => {
+            console.log('vid1');
+          //    userVideo.current.srcObject = stream;
+              socket.emit("join room", roomID);
+              socket.on("all users", users => {
+                  const peers = [];
+                  users.forEach(userID => {
+                      const peer = createPeer(userID, data.id, stream);
+                      peersRef.current.push({
+                          peerID: userID,
+                          peer,
+                      })
+                      peers.push(peer);
+                  })
+                  setPeers(peers);
+              })
+
+              socket.on("user joined", payload => {
+                  const peer = addPeer(payload.signal, payload.callerID, stream);
+                  peersRef.current.push({
+                      peerID: payload.callerID,
+                      peer,
+                  })
+
+                  setPeers(users => [...users, peer]);
+              });
+
+              socket.on("receiving returned signal", payload => {
+                  const item = peersRef.current.find(p => p.peerID === payload.id);
+                  item.peer.signal(payload.signal);
+              });
+      }
+
+      function createPeer(userToSignal, callerID, stream) {
+          const peer = new RTCPeerConnection({
+              initiator: true,
+              trickle: false,
+              stream,
+          });
+
+        //  peer.on("signal", signal => {
+              socket.emit("sending signal", { userToSignal, callerID, signal })
+          //})
+
+          return peer;
+      }
+
+      function addPeer(incomingSignal, callerID, stream) {
+          const peer = new Peer({
+              initiator: false,
+              trickle: false,
+              stream,
+          })
+
+        //  peer.on("signal", signal => {
+              socket.emit("returning signal", { signal, callerID })
+        //  })
+
+          peer.signal(incomingSignal);
+
+          return peer;
+      }
+
+
+
+*/
+      var playerPosns = {
+        topRightPlayerPosn: ' ' ,
+        topLeftPlayerPosn: ' ',
+        botLeftPlayerPosn: ' '
+      };
+/*      var answersFrom = {}, offer;
+var peerConnection = window.RTCPeerConnection ||
+    window.mozRTCPeerConnection ||
+    window.webkitRTCPeerConnection ||
+    window.msRTCPeerConnection;
+
+var sessionDescription = window.RTCSessionDescription ||
+    window.mozRTCSessionDescription ||
+    window.webkitRTCSessionDescription ||
+    window.msRTCSessionDescription;
+
+    navigator.getUserMedia  = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia ||
+    navigator.msGetUserMedia;
+
+var pc = new peerConnection({
+    iceServers: [{
+        url: "stun:stun.services.mozilla.com",
+        username: "somename",
+        credential: "somecredentials"
+    }]
+});
+
+pc.onaddstream = function (obj) {
+    var vid = document.createElement('video');
+    vid.setAttribute('class', 'video-small');
+    vid.setAttribute('autoplay', 'autoplay');
+    vid.setAttribute('id', 'video-small');
+    document.getElementById('users-container').appendChild(vid);
+    vid.srcObject = obj.stream;
+}
+navigator.getUserMedia({video: true, audio: true}, function (stream) {
+    var video = document.querySelector('video');
+    video.srcObject = stream;
+    pc.addStream(stream);
+}, error);
+function error(err) {
+    console.warn('Error', err);
+}
+*/
+      socket.on('initCam', function(data) {
+        if (board.isPlayerOne) {
+          playerPosns.topRightPlayerPosn = 'player4';
+          playerPosns.topLeftPlayerPosn = 'player3';
+          playerPosns.botLeftPlayerPosn = 'player2';
+        }
+        else if(board.isPlayerTwo) {
+          playerPosns.topRightPlayerPosn = 'player1';
+          playerPosns.topLeftPlayerPosn = 'player2';
+          playerPosns.botLeftPlayerPosn = 'player3';
+        }
+        else if(board.isPlayerThree) {
+          playerPosns.topRightPlayerPosn = 'player2';
+          playerPosns.topLeftPlayerPosn = 'player1';
+          playerPosns.botLeftPlayerPosn = 'player4';
+        }
+        else {
+          playerPosns.topRightPlayerPosn = 'player3';
+          playerPosns.topLeftPlayerPosn = 'player2';
+          playerPosns.botLeftPlayerPosn = 'player1';
+        }
+        initCamConnections(data.id);
+      });
+        var p_array = ['player1', 'player2', 'player3', 'player4'];
+        playerPosn = p_array[numPlayers];
+        var camConnMap = new Map();
+      //  posns = [topLeft, topRight, botLeft, botRight];
+        function initCamConnections(sessionId) {
+          initCamConn(sessionId,"topRightCamConn", playerPosns.topRightPlayerPosn);
+          initCamConn(sessioId,"topLeftCamConn", playerPosns.topLeftPlayerPosn);
+          initCamConn(sessionId,"botLeftCamConn", playerPosns.botLeftPlayerPosn);
+          determineCamOffers();
+
+        }
+        initCamConn = (sessionId, name, posn) => {
+      //      let camConn = new CamConn({
+      //          socketId: socketId,
+        //        name: name,
+        //        playerPosn: playerPosn,
+        //        peerPosn: posn,
+              //  sendMessage: sendSocketMsg,
+            //    handleAddStream: handleAddStream,
+            //    handleConnected: handleCamConnConnected,
+        //    });
+        //    camConnMap.set(posn, camConn);
+        }
+
+    //    camConnMap.push('player1');
+    //    camConnMap.push('player2');
+    //    camConnMap.push('player3');
+    //    camConnMap.push('player4');
+
+    //    playerPos = new WebcamSetUp();
+    //    camConnMap.push(playerPos);
+        determineCamOffers = () => {
+          switch (playerPos) {
+            case "player1": {
+              // Nothing to do, just wait for offers.
+              break;
+            }
+            case "player2": {
+            // Send offer to player 1.
+              let camConn = camConnMap.get("player1");
+              camConn.needsOffer = true;
+              console.log('cam');
+              //camConn.createAndSendOffer();
+          //    createOffer(camConn.)
+              break;
+            }
+            case "player3": {
+              // Send offers to player 1 and player 2.
+              let camConn = camConnMap.get("player1");
+              camConn.needsOffer = true;
+            //  camConn.createOffer();
+              camConn = camConnMap.get("player2");
+              camConn.needsOffer = true;
+              break;
+            }
+            case "player4": {
+              // Send offers to player 1, player 2 and player 3.
+              let camConn = camConnMap.get("player1");
+              camConn.needsOffer = true;
+              camConn = camConnMap.get("player2");
+              camConn.needsOffer = true;
+              camConn = camConnMap.get("player3");
+              camConn.needsOffer = true;
+              break;
+            }
+            default: {
+              // Nothing to do, just wait for offers.
+              break;
+            }
+          }
+        }
+
+         var answersFrom = [], offer;
+
+          var peerConnection = window.RTCPeerConnection ||
+              window.mozRTCPeerConnection ||
+              window.webkitRTCPeerConnection ||
+              window.msRTCPeerConnection;
+
+          var sessionDescription = window.RTCSessionDescription ||
+              window.mozRTCSessionDescription ||
+              window.webkitRTCSessionDescription ||
+              window.msRTCSessionDescription;
+
+              navigator.getUserMedia  = navigator.getUserMedia ||
+              navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia ||
+              navigator.msGetUserMedia;
+
+          var pc;
+          pc = new RTCPeerConnection({
+              iceServers: [{
+                  url: "stun:stun.services.mozilla.com",
+                  username: "somename",
+                  credential: "somecredentials"
+              }]
+          });
+
+          pc.onaddstream = function (obj) {
+              console.log('vid');
+              var vid = document.createElement('video');
+              vid.setAttribute('class', 'video-small');
+              vid.setAttribute('autoplay', 'autoplay');
+              vid.setAttribute('id', 'video-small');
+              document.body.appendChild(vid);
+              vid.srcObject = obj.stream;
+          }
+          //var stream;
+          navigator.getUserMedia({video: true, audio: true}, function (stream) {
+              var video = document.querySelector('video');
+              video.srcObject = stream;
+              pc.addStream(stream);
+          }, error);
+
+
+          var users = [];
+
+          socket.on('add-users', function (data) {
+              console.log(data.users[0]);
+              users.push(data.users[0]);
+              console.log('use');
+
+              console.log(data.users[1]);
+            //  const peers = [];
+
+              for (var i = 0; i < data.users.length; i++) {
+                  console.log(users.length);
+                //   peer = createPeer(data.users[i], socket.id, stream);
+                //   peers.push(peer);
+                  // setPeers(peers);
+                //  var array = data.users[0];
+                  var el = document.createElement('div'),
+                      id = users[i];
+
+                  el.setAttribute('id', id);
+                  console.log(el.id);
+                  el.innerHTML = id;
+                  createOffer(id);
+                  document.getElementById('users').appendChild(el);
+              }
+          });
+          socket.on('remove-user', function (id) {
+              var div = document.getElementById(id);
+              document.getElementById('users').removeChild(div);
+          });
+
+
+          socket.on('offer-made', function (data) {
+              console.log('made');
+              offer = data.offer;
+
+              pc.setRemoteDescription(new RTCSessionDescription(data.offer), function () {
+                  pc.createAnswer(function (answer) {
+                      pc.setLocalDescription(new RTCSessionDescription(answer), function () {
+                        console.log('make');
+                        console.log(data.socket);
+                          socket.emit('make-answer', {
+                              answer: answer,
+                              to: data.socket
+                          });
+                      }, error);
+                  }, error);
+              }, error);
+
+          });
+
+      //    connections = {remotePeerId: RTCPeerConnection, ...};
+          socket.on('answer-made', function (data) {
+            console.log('answer');
+            console.log(data.answer);
+              pc.setRemoteDescription(new RTCSessionDescription(data.answer), function () {
+                  console.log(data.socket);
+                  console.log(answersFrom);
+                  document.getElementById(data.socket).setAttribute('class', 'active');
+                  if (!answersFrom[data.socket]) {
+                      console.log('not');
+                      createOffer(data.socket);
+                      answersFrom[data.socket] = true;
+                  }
+              }, error);
+          });
+
+          function createOffer(id) {
+            console.log('offer');
+              pc.createOffer(function (offer) {
+                  pc.setLocalDescription(new RTCSessionDescription(offer), function () {
+                      socket.emit('make-offer', {
+                          offer: offer,
+                          to: id
+                      });
+                  }, error);
+              }, error);
+          }
+
+          function error(err) {
+              console.warn('Error', err);
+          }
+
+
+          //document.getElementById(catan_board).appendChild(resourceBar);
+          //resourceDisplay(resource_bar);
+          var board = new GameBoard(catan_board);
+          board.blankBoard();
+          socket.on('removeNewGame', function() {
+            var button = document.getElementsByTagName('button');
+            if (button[0])
+            button[0].parentNode.removeChild(button[0]);
+          });
+          socket.on('newBoard', function(data) {
+            board.newBoard(data);
+          });
+          socket.on('isPlayerOne', function()  {
+            console.log('one');
+            board.isPlayerOne = true;
+            board.isPlayerTwo = false;
+            board.isPlayerThree = false;
+            board.isPlayerFour = false;
+          });
+          socket.on('isPlayerTwo', function() {
+            console.log('two');
+            board.isPlayerTwo = true;
+            board.isPlayerOne = false;
+            board.isPlayerThree = false;
+            board.isPlayerFour = false;
+          });
+          socket.on('isPlayerThree', function() {
+            console.log('three');
+            board.isPlayerThree = true;
+            board.isPlayerTwo = false;
+            board.isPlayerOne = false;
+            board.isPlayerFour = false;
+          });
+          socket.on('isPlayerFour', function() {
+            console.log('four');
+            board.isPlayerFour = true;
+            board.isPlayerTwo = false;
+            board.isPlayerThree = false;
+            board.isPlayerOne = false;
+          });
+          socket.on('gameStart', function(data) {
+            board.gameStart(data);
+          });
+          socket.on('settlementSetup', function(data) {
+                  board.settlementSetup(data);
+          });
+          socket.on('bottomSpace', function(data) {
+            console.log('bot');
+            board.bottomSpace(data);
+          });
+          socket.on('botRoads', function(data) {
+            board.botRoads(data);
+          });
+          socket.on('bottomRoad', function(data){
+            board.botRoad(data);
+          });
+          socket.on('leftBotRoad', function(data) {
+            board.leftRoad(data);
+          });
+          socket.on('rightBotRoad', function(data) {
+            board.rightRoad(data);
+          });
+          socket.on('placeSettlement', function(data) {
+            console.log('a');
+            board.placeSettlement(data);
+          });
+          socket.on('buildSettlement', function(data) {
+            board.buildSettlement(data);
+          });
+          socket.on('rightSpace', function(data) {
+            console.log('space');
+            board.space(data);
+          });
+          socket.on('rightRoads', function(data) {
+            console.log('road');
+            board.rightRoads(data);
+          });
+          socket.on('tRoad', function(data) {
+            board.topRoad(data);
+          });
+          socket.on('leftRoad', function(data) {
+            board.leftRoadRightSpace(data);
+          });
+          socket.on('rightRoad', function(data) {
+            board.rightRoadRightSpace(data);
+          });
+          socket.on('rob', function(data) {
+            board.robber(data);
+          });
+          socket.on('discardResources', function(data) {
+            console.log('discard');
+            board.discardResources(data);
+          });
+          socket.on('distributeResources', function(data) {
+            distributeResources(data.roll);
+          })
+          socket.on('city', function(data) {
+            board.buildCity(data.player, data.settle);
+          });
+          socket.on('playerTrade', function(data) {
+            board.tradeProposal(data);
+          });
+          socket.on('tradeResources', function(data) {
+            board.tradeResources(data);
+          });
+          socket.on('updateResource', function(data) {
+            playerList[data.player].updateResources(data.resource, data.val);
+            board.displayResources();
+          });
+        //  gameLoop(catan_board); */
+
+      </script>
+  </body>
+</html>
