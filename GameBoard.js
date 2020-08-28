@@ -4,34 +4,30 @@ class GameBoard {
     this.vertices;
     this.setup = true;
     this.gameBoard;
-    //this.socket = io();
     this.isPlayerOne = false;
     this.isPlayerTwo = false;
     this.isPlayerThree = false;
     this.isPlayerFour = false;
     this.resourceBar;
-    //this.socket.on('isPlayerOne', function() {
-    //  this.isPlayerOne = true;
-    //});
-
-  }
-  setIsPlayerOne() {
-    this.isPlayerOne = true;
   }
 
+   // creates blankboard displayed before a new game is started
   blankBoard() {
+    // adds a div displaying the players resources
+    //TODO update the style of the resource bar so it is not hidden under the board
+    // (bar got moved when webcams were attempted to be added to the screen)
     this.resourceBar = document.createElement('div');
     this.resourceBar.classList.add('resource_bar')
     this.board.appendChild(this.resourceBar);
-
-
+    
+    // board uses 37 tiles 
+    // ocean tiles surround the blank tiles which will be flipped to resources when the game begins
     for (var i = 0; i < 37; i++) {
+      // positions of tiles are hard coded in for simplicity
+      // the position determines which css classes to add
       if (i < 1) {
         var hex = document.createElement('div');
         hex.classList.add('row1','hex', 'ocean');
-        //hex.classList.add('ocean');
-        console.log(hex);
-
       }
       else if (i < 4) {
         var hex = document.createElement('div');
@@ -50,11 +46,9 @@ class GameBoard {
       }
       else if (i < 8) {
         var hex = document.createElement('div');
-        //if (start == 1) {
           hex.classList.add('hex');
           this.board.appendChild(hex);
           document.body.appendChild(this.board);
-
       }
       else if (i < 9) {
         var hex = document.createElement('div');
@@ -132,10 +126,15 @@ class GameBoard {
       document.body.appendChild(this.board);
     }
   }
-
+  
+  /* param: data - contains the shuffled port_array, num_array and resource_array
+    * so that the board is randomized each game
+    * description: creates the playable board displaying resources and ports
+  */
   newBoard(data) {
+    // each players board outline will be in their own color making it easier for 
+    // a player to keep track of their color for trading purposes
     if (this.isPlayerOne) {
-      console.log('p1');
       this.board.style.borderColor = playerList[0].color;
     }
     else if (this.isPlayerTwo) {
@@ -150,6 +149,7 @@ class GameBoard {
     var portCount = 0;
     port_number = 0;
     var count = 0;
+    // there will be 54 vertices on the board that can be built on
     gameBoard = new BoardGraph(54);
     this.vertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                     'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -157,9 +157,12 @@ class GameBoard {
                     'II', 'JJ', 'KK', 'LL', 'MM', 'NN', 'OO', 'PP', 'QQ', 'RR',
                     'SS', 'TT', 'UU', 'VV', 'WW', 'XX','YY','ZZ','AAA', 'BBB'];
 
+     // all vertices are first added to the graph
     for (var i = 0; i<this.vertices.length; i++) {
       gameBoard.addVertex(this.vertices[i]);
     }
+    // the edges on the graph are hard coded in and will be used to prevent a player from building
+    // on an adjacent space to a space that has already been built on
     gameBoard.addEdge('A', 'B');
     gameBoard.addEdge('A', 'I');
     gameBoard.addEdge('B', 'C');
@@ -233,34 +236,6 @@ class GameBoard {
     gameBoard.addEdge('ZZ', 'AAA');
     gameBoard.addEdge('AAA', 'BBB');
 
-
-
-    //for (var x = 0; x < vertices.length; x++) {
-  //    var get_keys= board.AdjList.get(vertices[x]);
-  //    roadMap.set(vertices[x], get_keys);
-  //  }
-    /*roadMap.set('A', ['R1','R6']);
-    roadMap.set('B', ['R1', 'R2']);
-    roadMap.set('C', ['R2', 'R3', 'R7']);
-    roadMap.set('D', ['R7', 'R8']);
-    roadMap.set('E', ['R8', 'R12']);
-
-
-    .set('F', ['R12', 'R13']);
-    roadMap.set('G', ['R13', 'R14']);
-    roadMap.set('H', ['R'])
-    roadMap.set('I')
-    roadMap.set('J')
-    roadMap.set('K')
-    roadMap.set('L')
-    roadMap.set()
-    roadMap.set()
-    roadMap.set()
-    */
-
-
-
-    //div.innerHTML = '';
     portsList = data.port_array;
     tiles = document.getElementsByClassName('hex');
     for (i = 0; i < 37; i++) {
@@ -284,7 +259,6 @@ class GameBoard {
           robberLocation = i;
           console.log(robberLocation);
         }
-        //tiles[i].id = i;
     }
     if (this.isPlayerOne === true) {
       console.log('beg');
