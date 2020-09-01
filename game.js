@@ -1,3 +1,5 @@
+// Contains arrays used to randomize the gameboard and shuffle methods
+
 var hex_array = ['Wood', 'Wood', 'Wood', 'Wood', 'Wheat', 'Wheat', 'Wheat',
                     'Wheat', 'Sheep','Sheep','Sheep','Sheep', 'Rock', 'Rock',
                     'Rock', 'Brick', 'Brick', 'Brick','Desert'];
@@ -9,7 +11,7 @@ var dev_cards = ['Knight', 'Knight', 'Knight', 'Knight', 'Knight', 'Knight', 'Kn
                   'Knight', 'Victory Point','Victory Point', 'Victory Point',
                   'Victory Point','Victory Point', 'Monopoly', 'Monopoly',
                   'Road Building', 'Road Building', 'Year of Plenty', 'Year of Plenty'];
-//var roll = 0;
+
 Array.prototype.hex_tile_shuffle = function() {
   var i = this.length, j, temp;
   while(--i > 0) {

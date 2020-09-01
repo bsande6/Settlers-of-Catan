@@ -19,8 +19,8 @@ class GameBoard {
     this.resourceBar = document.createElement('div');
     this.resourceBar.classList.add('resource_bar')
     this.board.appendChild(this.resourceBar);
-    
-    // board uses 37 tiles 
+
+    // board uses 37 tiles
     // ocean tiles surround the blank tiles which will be flipped to resources when the game begins
     for (var i = 0; i < 37; i++) {
       // positions of tiles are hard coded in for simplicity
@@ -126,13 +126,13 @@ class GameBoard {
       document.body.appendChild(this.board);
     }
   }
-  
+
   /* param: data - contains the shuffled port_array, num_array and resource_array
     * so that the board is randomized each game
     * description: creates the playable board displaying resources and ports
   */
   newBoard(data) {
-    // each players board outline will be in their own color making it easier for 
+    // each players board outline will be in their own color making it easier for
     // a player to keep track of their color for trading purposes
     if (this.isPlayerOne) {
       this.board.style.borderColor = playerList[0].color;
@@ -260,30 +260,20 @@ class GameBoard {
           console.log(robberLocation);
         }
     }
+    // prevents the gameStart function from starting on multiple clients
     if (this.isPlayerOne === true) {
-      console.log('beg');
       socket.emit('Begin');
     }
 
     this.displayResources();
-//  for (var j = 0; j<37; j++) {
-  //  if tiles[j].classList.contains(robber) {
-//      robber = j;
-//    }
-
-
-      //  var hex = document.createElement('div');
-
-        //hex.classList.add('row1', 'ocean-hex');
-        //div.appendChild(hex);
-        //document.body.appendChild(div);
-
   }
 
+  /* description: dispays the players resources on their respective screen
+  */
   displayResources() {
-
+    // determines which player's resources to print so that the player see their
+    // own resources
     if (this.isPlayerOne) {
-        console.log(playerList[0].resources);
         this.resourceBar.innerHTML = 'Wood: ' + playerList[0].resources.wood +
         ' Brick: ' + playerList[0].resources.brick + '  Sheep: ' + playerList[0].resources.sheep +
         '  Wheat: ' + playerList[0].resources.wheat + '  Ore: ' + playerList[0].resources.ore;
@@ -307,6 +297,13 @@ class GameBoard {
         '  Wheat: ' + playerList[3].resources.wheat + '  Ore: ' + playerList[3].resources.ore;
     }
   }
+  /* param: port - the specific port that will be displayed
+   * hex - the tile on which the port will be located
+   * portCount - the port number used to determine where the port will be
+   * positioned relative to the ocean tile
+   * description: displays the randomly assigned port on the appropriate ocean
+   * tile for players to see
+  */
   displayPort(port, hex, portCount) {
       var element = document.createElement('div');
       element.classList.add("port_format");
@@ -315,9 +312,13 @@ class GameBoard {
       port = port.fontcolor("white");
       element.innerHTML= port;
       hex.appendChild(element);
+      // div used to show what part of the tile a player can build on to access
+      // the port
       var portLocation = document.createElement('div');
       portLocation.classList.add('port_display');
       port_number++;
+      // determines what part of the ocean tile that the portLocation should be
+      // displayed on
       if (portCount == 0) {
         portLocation.classList.add('bottom_right_edge');
       }
@@ -351,10 +352,8 @@ class GameBoard {
       hex.value = number;
       hex.resource = 'wheat';
       num_count++;
-
-  //    count++;
-    //  document.body.appendChild(hex);
     }
+    
     else if (resource == 'Wood') {
     //  var hex = document.createElement('div');
       hex.classList.add('wood');
